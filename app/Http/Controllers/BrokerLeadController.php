@@ -108,6 +108,11 @@ class BrokerLeadController extends Controller
 
         AuditLog::log('lead.created', $lead);
 
+        // Same lifecycle hook the CRM's own lead creation fires, so workflows
+        // and the automatic WhatsApp message treat a broker enquiry like any
+        // other new lead.
+        \App\Facades\Hooks::doAction('lead.created', $lead);
+
         return redirect()->route('broker.leads.index')
             ->with('success', __('Enquiry recorded. The team can see it in the CRM.'));
     }

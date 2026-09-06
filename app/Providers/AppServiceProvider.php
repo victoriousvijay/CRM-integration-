@@ -82,6 +82,17 @@ class AppServiceProvider extends ServiceProvider
             }
         }, 99);
 
+        // Automatic WhatsApp to the client. A no-op unless the tenant has
+        // configured WhatsApp and mapped a template to this moment.
+        $hooks->addAction('lead.created', function ($lead) {
+            app(\App\Services\WhatsAppService::class)->sendForEvent('lead.created', $lead);
+        }, 100);
+
+        $hooks->addAction('lead.status_changed', function ($lead, $oldStatus = null) {
+            app(\App\Services\WhatsAppService::class)
+                ->sendForEvent('lead.status_changed', $lead, $lead->status);
+        }, 100);
+
         $hooks->addAction('lead.status_changed', function ($lead, $oldStatus = null) {
             try {
                 app(\App\Services\WorkflowEngine::class)->trigger('lead_status_changed', $lead, [

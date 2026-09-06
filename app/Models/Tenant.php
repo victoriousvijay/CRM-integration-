@@ -13,6 +13,7 @@ class Tenant extends Model
         'api_key',
         'ai_api_key',
         'mail_settings',
+        'whatsapp_settings',
     ];
 
     protected $fillable = [
@@ -50,6 +51,7 @@ class Tenant extends Model
         'notification_preferences',
         'default_dashboard_widgets',
         'mail_settings',
+        'whatsapp_settings',
         'require_2fa',
         'sso_default_driver',
         'storage_disk',
@@ -70,6 +72,7 @@ class Tenant extends Model
             'notification_preferences' => 'array',
             'default_dashboard_widgets' => 'array',
             'mail_settings' => 'array',
+            'whatsapp_settings' => 'array',
             'require_2fa' => 'boolean',
         ];
     }

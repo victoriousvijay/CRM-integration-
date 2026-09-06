@@ -21,6 +21,7 @@ use App\Http\Controllers\InstallController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\WhatsappSettingsController;
 use App\Http\Controllers\AiController;
 use App\Http\Controllers\AiLogController;
 use App\Http\Controllers\CalendarController;
@@ -507,6 +508,13 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::put('/settings/general', [SettingsController::class, 'updateGeneral'])->name('settings.updateGeneral');
         Route::post('/settings/invite-agent', [SettingsController::class, 'inviteAgent'])->name('settings.inviteAgent');
+        // WhatsApp automation — connection, template mapping and a test send.
+        Route::get('/settings/whatsapp', [WhatsappSettingsController::class, 'index'])->name('settings.whatsapp');
+        Route::put('/settings/whatsapp', [WhatsappSettingsController::class, 'updateConnection'])->name('settings.whatsapp.connection');
+        Route::post('/settings/whatsapp/templates', [WhatsappSettingsController::class, 'saveTemplate'])->name('settings.whatsapp.template');
+        Route::delete('/settings/whatsapp/templates/{template}', [WhatsappSettingsController::class, 'deleteTemplate'])->name('settings.whatsapp.template.delete');
+        Route::post('/settings/whatsapp/test', [WhatsappSettingsController::class, 'test'])->name('settings.whatsapp.test');
+
         Route::patch('/settings/agents/{user}/toggle', [SettingsController::class, 'toggleAgent'])->name('settings.toggleAgent');
         Route::delete('/settings/agents/{user}/reset-2fa', [SettingsController::class, 'reset2fa'])->name('settings.reset2fa');
         Route::delete('/settings/agents/{user}', [SettingsController::class, 'destroyAgent'])->name('settings.destroyAgent');

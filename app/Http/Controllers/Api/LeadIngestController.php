@@ -161,6 +161,11 @@ class LeadIngestController extends Controller
 
         AuditLog::log('lead.created_via_api', $lead);
 
+        // A lead arriving through the API is still a new lead: fire the same
+        // lifecycle hook so workflows and the automatic WhatsApp message run
+        // for website enquiries too.
+        \App\Facades\Hooks::doAction('lead.created', $lead);
+
         \App\Services\WebhookService::dispatch('lead.created', [
             'lead_id' => $lead->id,
             'first_name' => $lead->first_name,

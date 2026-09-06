@@ -41,6 +41,32 @@
         </div>
         @endif
 
+        @if($whatsappMessages ?? false)
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3 class="card-title">{{ __('WhatsApp Messages') }}</h3>
+            </div>
+            <div class="list-group list-group-flush">
+                @foreach($whatsappMessages as $message)
+                    <div class="list-group-item d-flex justify-content-between align-items-start gap-2">
+                        <div>
+                            <strong>{{ $message->template_name ?? __('Message') }}</strong>
+                            <div class="text-secondary small">
+                                {{ $message->created_at?->format('d M Y, g:i A') }} &middot; {{ $message->to_number }}
+                            </div>
+                            @if($message->error)
+                                <div class="text-danger small">{{ $message->error }}</div>
+                            @endif
+                        </div>
+                        <span class="badge {{ ['sent' => 'bg-green-lt', 'failed' => 'bg-red-lt'][$message->status] ?? 'bg-secondary-lt' }}">
+                            {{ __(ucfirst($message->status)) }}
+                        </span>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         @if($lead->broker_id)
         {{-- Enquiries logged by a broker in their portal carry context the CRM
              forms never collect: who brought the client in, what they were

@@ -259,7 +259,8 @@
                             </a>
                             <div class="dropdown-menu {{ $systemActive ? 'show' : '' }}">
 
-                                <a class="dropdown-item {{ request()->is('settings*') && !request()->is('settings/plugins*') ? 'active' : '' }}" href="{{ route('settings.index') }}">{{ __('Settings') }}</a>
+                                <a class="dropdown-item {{ request()->is('settings*') && !request()->is('settings/plugins*') && !request()->is('settings/whatsapp*') ? 'active' : '' }}" href="{{ route('settings.index') }}">{{ __('Settings') }}</a>
+                                <a class="dropdown-item {{ request()->is('settings/whatsapp*') ? 'active' : '' }}" href="{{ route('settings.whatsapp') }}">{{ __('WhatsApp') }}</a>
                                 <a class="dropdown-item {{ request()->is('settings/plugins*') ? 'active' : '' }}" href="{{ route('plugins.index') }}">{{ __('Plugins') }}</a>
                                 <a class="dropdown-item {{ request()->is('api-docs*') ? 'active' : '' }}" href="{{ route('api-docs.index') }}">{{ __('API Docs') }}</a>
                                 <a class="dropdown-item {{ request()->is('error-logs*') ? 'active' : '' }}" href="{{ route('error-logs.index') }}">{{ __('Bug Reports') }}</a>

@@ -212,7 +212,9 @@ class LeadController extends Controller
         $lead->load(['agent', 'broker', 'visitedProperty', 'clientPhoto', 'property', 'activities', 'tasks', 'deals', 'lists', 'photos.uploader', 'sequenceEnrollments.sequence.steps']);
         $sequences = \App\Models\Sequence::where('is_active', true)->get();
         $assignmentHistory = app(AssignmentHistoryService::class)->getHistory($lead);
-        return view('leads.show', compact('lead', 'sequences', 'assignmentHistory'));
+        $whatsappMessages = \App\Models\WhatsappMessage::where('lead_id', $lead->id)->latest()->get();
+
+        return view('leads.show', compact('lead', 'sequences', 'assignmentHistory', 'whatsappMessages'));
     }
 
     public function edit(Lead $lead)
