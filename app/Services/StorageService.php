@@ -55,6 +55,24 @@ class StorageService
         return $this->disk()->delete($path);
     }
 
+    /**
+     * Whether an uploaded file stored now will still be there later.
+     *
+     * A serverless host gives each invocation a fresh, read-only filesystem
+     * with only /tmp writable, so a "local" or "public" disk silently loses
+     * every upload — and the app would otherwise record a path to a file that
+     * no longer exists. Object storage (S3, or Supabase Storage, which is
+     * S3-compatible) is the only durable option there.
+     */
+    public function persistsUploads(): bool
+    {
+        if ($this->getDiskName() === 's3') {
+            return true;
+        }
+
+        return getenv('VERCEL') === false;
+    }
+
     protected function getDiskName(): string
     {
         $user = auth()->user();

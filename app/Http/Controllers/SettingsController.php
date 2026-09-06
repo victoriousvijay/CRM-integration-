@@ -84,8 +84,14 @@ class SettingsController extends Controller
         $data = $request->only(['name', 'timezone', 'currency', 'date_format', 'country', 'measurement_system', 'locale']);
 
         if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('logos', 'public');
-            $data['logo_path'] = $path;
+            // Refuse rather than record a path to a file the host will drop —
+            // that produced a broken image on every page with no clue why.
+            if (! app(\App\Services\StorageService::class)->persistsUploads()) {
+                return redirect()->route('settings.index', ['tab' => 'general'])
+                    ->with('error', __('This deployment has no persistent file storage, so an uploaded logo would be lost. Configure S3 (or Supabase Storage) under Settings → Storage first.'));
+            }
+
+            $data['logo_path'] = $request->file('logo')->store('logos', 'public');
         }
 
         $tenant->update($data);

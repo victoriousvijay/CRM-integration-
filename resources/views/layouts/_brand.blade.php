@@ -13,11 +13,18 @@
     $size = $size ?? '1.5rem';
 @endphp
 
+@php $wordmarkId = 'brand-wordmark-'.\Illuminate\Support\Str::random(6); @endphp
+
+<span id="{{ $wordmarkId }}" @if($brandLogo) hidden @endif
+      style="font-size: {{ $size }}; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; color: {{ $onDark ? '#fff' : '#1e293b' }};">
+    {{ \App\Support\Brand::name() }}
+</span>
+
 @if($brandLogo)
+    {{-- A stored logo can be unreachable (a file lost with an ephemeral disk,
+         storage reconfigured). Fall back to the wordmark rather than leaving a
+         broken image where the brand should be. --}}
     <img src="{{ $brandLogo }}" alt="{{ \App\Support\Brand::name() }}"
-         style="max-height: 48px; max-width: 220px;">
-@else
-    <span style="font-size: {{ $size }}; font-weight: 700; letter-spacing: -0.02em; white-space: nowrap; color: {{ $onDark ? '#fff' : '#1e293b' }};">
-        {{ \App\Support\Brand::name() }}
-    </span>
+         style="max-height: 48px; max-width: 220px;"
+         onerror="this.remove(); document.getElementById('{{ $wordmarkId }}').hidden = false;">
 @endif

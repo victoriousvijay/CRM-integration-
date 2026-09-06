@@ -485,6 +485,9 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
         Route::delete('/settings/agents/{user}/reset-2fa', [SettingsController::class, 'reset2fa'])->name('settings.reset2fa');
         Route::delete('/settings/agents/{user}', [SettingsController::class, 'destroyAgent'])->name('settings.destroyAgent');
         Route::put('/settings/business-mode', [SettingsController::class, 'updateBusinessMode'])->name('settings.updateBusinessMode');
+        // Landing on the action URL directly (a refresh, a back button, a
+        // bookmark) otherwise dead-ends on 405 Method Not Allowed.
+        Route::get('/settings/business-mode', fn () => redirect()->route('settings.index', ['tab' => 'general']));
         Route::put('/settings/distribution', [SettingsController::class, 'updateDistribution'])->name('settings.updateDistribution');
 
         // DNC Management
