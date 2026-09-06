@@ -23,6 +23,24 @@ if (($_GET['vercel_diag'] ?? null) === 'db') {
     $out = [];
 
     try {
+    // Same /tmp cache + storage redirection public/index.php performs; the
+    // probe bypasses that file, so replicate it here.
+    $tmp = sys_get_temp_dir();
+    foreach ([
+        'LARAVEL_STORAGE_PATH' => $tmp.'/insula-storage',
+        'APP_SERVICES_CACHE' => $tmp.'/insula-bootstrap-cache/services.php',
+        'APP_PACKAGES_CACHE' => $tmp.'/insula-bootstrap-cache/packages.php',
+        'APP_CONFIG_CACHE' => $tmp.'/insula-bootstrap-cache/config.php',
+        'APP_ROUTES_CACHE' => $tmp.'/insula-bootstrap-cache/routes-v7.php',
+        'APP_EVENTS_CACHE' => $tmp.'/insula-bootstrap-cache/events.php',
+    ] as $k => $v) {
+        putenv("{$k}={$v}");
+        $_ENV[$k] = $v;
+        $_SERVER[$k] = $v;
+    }
+    @mkdir($tmp.'/insula-bootstrap-cache', 0775, true);
+    @mkdir($tmp.'/insula-storage/framework/views', 0775, true);
+
     require dirname(__DIR__).'/vendor/autoload.php';
     $app = require dirname(__DIR__).'/bootstrap/app.php';
     $app->make(\Illuminate\Contracts\Http\Kernel::class)->bootstrap();
