@@ -16,6 +16,40 @@ $publicPath = dirname(__DIR__).'/public';
 $_SERVER['SCRIPT_FILENAME'] = $publicPath.'/index.php';
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 
+if (($_GET['vercel_diag'] ?? null) === 'db') {
+    // One-off diagnostic: report whether the database is reachable, and with
+    // what error if not. Never prints credentials — host/port/database only.
+    require dirname(__DIR__).'/vendor/autoload.php';
+    $app = require dirname(__DIR__).'/bootstrap/app.php';
+    $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+
+    $cfg = config('database.connections.'.config('database.default'));
+    $out = [
+        'driver' => $cfg['driver'] ?? null,
+        'host' => $cfg['host'] ?? null,
+        'port' => $cfg['port'] ?? null,
+        'database' => $cfg['database'] ?? null,
+        'username' => $cfg['username'] ?? null,
+        'sslmode' => $cfg['sslmode'] ?? null,
+        'url_set' => ! empty($cfg['url']),
+        'url_host' => ! empty($cfg['url']) ? (parse_url($cfg['url'], PHP_URL_HOST).':'.parse_url($cfg['url'], PHP_URL_PORT)) : null,
+    ];
+
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $out['connected'] = true;
+        $out['tenants'] = \Illuminate\Support\Facades\DB::table('tenants')->count();
+        $out['users'] = \Illuminate\Support\Facades\DB::table('users')->count();
+    } catch (\Throwable $e) {
+        $out['connected'] = false;
+        $out['error'] = $e->getMessage();
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode($out, JSON_PRETTY_PRINT);
+    exit;
+}
+
 if (($_GET['vercel_diag'] ?? null) === 'bootstrap') {
     // One-off diagnostic: step through Laravel's own boot sequence by hand,
     // logging after each stage, to find exactly which step throws. See
