@@ -55,19 +55,17 @@ class Brand
     }
 
     /**
-     * Logo URL for the current request.
+     * The current tenant's uploaded logo, if they have one.
      *
-     * @param  bool  $onDark  Whether the logo sits on a dark background, which
-     *                        the platform's own logo has a variant for.
+     * Returns null rather than a platform logo on purpose: the shipped logo
+     * images have a product name baked into the artwork, which is exactly
+     * what a white-label deployment must not show. Callers fall back to
+     * rendering name() as a wordmark instead — see layouts/_brand.blade.php.
      */
-    public static function logo(bool $onDark = false): string
+    public static function logo(): ?string
     {
         $logoPath = static::tenant()?->logo_path;
 
-        if (filled($logoPath)) {
-            return asset('storage/'.$logoPath);
-        }
-
-        return asset($onDark ? 'images/logo-white.png' : 'images/logo.png');
+        return filled($logoPath) ? asset('storage/'.$logoPath) : null;
     }
 }

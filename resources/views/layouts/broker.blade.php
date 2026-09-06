@@ -14,8 +14,8 @@
 <header class="navbar navbar-expand-md navbar-light d-print-none border-bottom bg-white">
     <div class="container-xl">
         <h1 class="navbar-brand navbar-brand-autodark mb-0 me-3">
-            <a href="{{ route('broker.index') }}">
-                <img src="{{ \App\Support\Brand::logo() }}" alt="{{ \App\Support\Brand::name() }}" style="max-height:40px;max-width:180px;">
+            <a href="{{ route('broker.index') }}" class="text-decoration-none">
+                @include('layouts._brand', ['size' => '1.4rem'])
             </a>
         </h1>
 

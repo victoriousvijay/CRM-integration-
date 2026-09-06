@@ -97,12 +97,7 @@
                 </button>
                 <h1 class="navbar-brand navbar-brand-autodark" style="margin-bottom: 0;">
                     <a href="{{ route('dashboard') }}">
-                        @php $tenantLogo = auth()->user()->tenant->logo_path ?? null; @endphp
-                        @if($tenantLogo)
-                            <img src="{{ asset('storage/' . $tenantLogo) }}" alt="{{ \App\Support\Brand::name() }}" style="max-height: 56px; max-width: 220px;">
-                        @else
-                            <img src="{{ asset('images/logo-white.png') }}" alt="{{ \App\Support\Brand::name() }}" style="max-height: 84px; max-width: 330px;">
-                        @endif
+                        @include('layouts._brand', ['onDark' => true, 'size' => '1.4rem'])
                     </a>
                 </h1>
                 <div class="collapse navbar-collapse" id="sidebar-menu">

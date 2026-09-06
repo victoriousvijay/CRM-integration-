@@ -14,8 +14,8 @@
     <main class="page page-center">
         <div class="container container-tight py-4">
             <div class="text-center mb-4">
-                <a href="{{ url('/') }}">
-                    <img src="{{ asset('images/logo.png') }}" alt="{{ \App\Support\Brand::name() }}" style="max-height: 60px; max-width: 280px;">
+                <a href="{{ url('/') }}" class="text-decoration-none">
+                    @include('layouts._brand', ['size' => '2rem'])
                 </a>
             </div>
             @yield('content')

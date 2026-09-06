@@ -3,11 +3,34 @@
 @section('title', __('Login'))
 
 @section('content')
+@php
+    // Which side of the product the visitor is signing in to. Only decides
+    // where they land afterwards — the account's own role still governs what
+    // they can reach.
+    $portal = old('portal', request('as') === 'broker' ? 'broker' : 'team');
+@endphp
+
 <div class="card card-md">
+    <ul class="nav nav-tabs nav-fill" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a href="{{ route('login') }}" class="nav-link @if($portal === 'team') active @endif" role="tab">
+                {{ __('Team') }}
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a href="{{ route('login', ['as' => 'broker']) }}" class="nav-link @if($portal === 'broker') active @endif" role="tab">
+                {{ __('Broker') }}
+            </a>
+        </li>
+    </ul>
     <div class="card-body">
-        <h2 class="h2 text-center mb-4">{{ __('Login to your account') }}</h2>
+        <h2 class="h2 text-center mb-1">{{ __('Login to your account') }}</h2>
+        <p class="text-secondary text-center mb-4">
+            {{ $portal === 'broker' ? __('Sign in to view the properties shared with you.') : __('Sign in to your CRM workspace.') }}
+        </p>
         <form action="{{ route('login') }}" method="POST" autocomplete="off">
             @csrf
+            <input type="hidden" name="portal" value="{{ $portal }}">
             <div class="mb-3">
                 <label class="form-label">{{ __('Email address') }}</label>
                 <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
@@ -51,8 +74,5 @@
         </div>
         @endif
     </div>
-</div>
-<div class="text-center text-secondary mt-3">
-    {{ __("Don't have account yet?") }} <a href="{{ route('register') }}">{{ __('Sign up') }}</a>
 </div>
 @endsection

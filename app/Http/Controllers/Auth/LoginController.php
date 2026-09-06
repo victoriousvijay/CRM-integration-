@@ -69,6 +69,13 @@ class LoginController extends Controller
                 return redirect()->route('onboarding.index');
             }
 
+            // The login form's Team/Broker tab only picks the landing page;
+            // what the account may actually reach is still decided by its
+            // role, so a non-broker choosing the broker tab lands in the CRM.
+            if ($request->input('portal') === 'broker' && ($user->isBroker() || $user->isAdmin())) {
+                return redirect()->route('broker.index');
+            }
+
             return redirect()->intended('/dashboard');
         }
 
