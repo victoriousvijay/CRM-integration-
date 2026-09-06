@@ -54,19 +54,11 @@ if (($_GET['vercel_diag'] ?? null) === 'db') {
         'username' => $cfg['username'] ?? null,
         'sslmode' => $cfg['sslmode'] ?? null,
         'url_set' => ! empty($cfg['url']),
-        'url_host' => ! empty($cfg['url']) ? (parse_url($cfg['url'], PHP_URL_HOST).':'.parse_url($cfg['url'], PHP_URL_PORT)) : null,
     ];
 
-    // Shape-only report on DB_URL so a malformed value can be identified
-    // without ever printing the password. Redacts everything between the
-    // second ":" and the "@".
+    // Never echo any part of the URL itself — only whether it parses.
     if (! empty($cfg['url'])) {
-        $raw = (string) $cfg['url'];
-        $out['url_length'] = strlen($raw);
-        $out['url_parses'] = parse_url($raw) !== false && parse_url($raw, PHP_URL_HOST) !== null;
-        $out['url_redacted'] = preg_replace('~://([^:/@]*):.*@~', '://$1:***@', $raw);
-        $out['url_has_placeholder'] = (bool) preg_match('~\[|\]|YOUR-PASSWORD~i', $raw);
-        $out['url_has_whitespace_or_quotes'] = (bool) preg_match('~^["\']|["\']$|\s~', $raw);
+        $out['url_parses'] = parse_url((string) $cfg['url'], PHP_URL_HOST) !== null;
     }
 
     try {
