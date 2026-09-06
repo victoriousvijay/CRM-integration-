@@ -70,6 +70,7 @@ if (! function_exists('insulaPrepareServerlessStoragePath')) {
     function insulaPrepareServerlessStoragePath(): string
     {
         $path = sys_get_temp_dir() . '/insula-storage';
+        $cachePath = sys_get_temp_dir() . '/insula-bootstrap-cache';
 
         foreach ([
             $path,
@@ -79,13 +80,33 @@ if (! function_exists('insulaPrepareServerlessStoragePath')) {
             $path . '/framework/cache/data',
             $path . '/framework/sessions',
             $path . '/framework/views',
+            $cachePath,
         ] as $dir) {
             if (! is_dir($dir)) {
                 @mkdir($dir, 0775, true);
             }
         }
 
-        putenv('LARAVEL_STORAGE_PATH=' . $path);
+        // Laravel writes its compiled provider/package manifests to
+        // bootstrap/cache at runtime whenever they're missing or stale, and
+        // throws outright ("directory must be present and writable") when it
+        // can't — which on a read-only serverless filesystem aborts provider
+        // registration entirely, leaving core bindings like "view" missing.
+        // Point every cache path at /tmp so those writes succeed.
+        $envPaths = [
+            'LARAVEL_STORAGE_PATH' => $path,
+            'APP_SERVICES_CACHE' => $cachePath . '/services.php',
+            'APP_PACKAGES_CACHE' => $cachePath . '/packages.php',
+            'APP_CONFIG_CACHE' => $cachePath . '/config.php',
+            'APP_ROUTES_CACHE' => $cachePath . '/routes-v7.php',
+            'APP_EVENTS_CACHE' => $cachePath . '/events.php',
+        ];
+
+        foreach ($envPaths as $key => $value) {
+            putenv("{$key}={$value}");
+            $_ENV[$key] = $value;
+            $_SERVER[$key] = $value;
+        }
 
         return $path;
     }
