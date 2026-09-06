@@ -101,6 +101,97 @@ class PropertyController extends Controller
     }
 
     /**
+     * Show the form for creating a property that isn't tied to a lead.
+     *
+     * Properties could previously only be created from a lead's detail page,
+     * which left no way to record a listing the brokerage holds directly.
+     */
+    public function create()
+    {
+        $this->authorize('create', Property::class);
+
+        return view('properties.create');
+    }
+
+    /**
+     * Store a standalone property.
+     */
+    public function storeStandalone(PropertyRequest $request)
+    {
+        $this->authorize('create', Property::class);
+
+        $data = $this->prepare($request->validated());
+
+        $property = Property::create($data);
+
+        AuditLog::log('property.created', $property);
+
+        return redirect()->route('properties.show', $property)
+            ->with('success', __('Property created successfully.'));
+    }
+
+    /**
+     * Show the form for editing a property.
+     */
+    public function edit(Property $property)
+    {
+        $this->authorize('update', $property);
+
+        return view('properties.edit', compact('property'));
+    }
+
+    /**
+     * Update a property.
+     */
+    public function update(PropertyRequest $request, Property $property)
+    {
+        $this->authorize('update', $property);
+
+        $property->update($this->prepare($request->validated()));
+
+        AuditLog::log('property.updated', $property);
+
+        return redirect()->route('properties.show', $property)
+            ->with('success', __('Property updated successfully.'));
+    }
+
+    /**
+     * Delete a property.
+     */
+    public function destroy(Property $property)
+    {
+        $this->authorize('delete', $property);
+
+        AuditLog::log('property.deleted', $property);
+
+        $property->delete();
+
+        return redirect()->route('properties.index')
+            ->with('success', __('Property deleted.'));
+    }
+
+    /**
+     * Normalize submitted property data and derive anything computed from it.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    protected function prepare(array $data): array
+    {
+        $data = AddressNormalizationService::normalizeAll($data);
+        $data['tenant_id'] = auth()->user()->tenant_id;
+
+        // MAO: (ARV x 0.70) - repair estimate. Wholesale-only arithmetic, so
+        // it stays out of a real estate tenant's records entirely.
+        if (! \App\Services\BusinessModeService::isRealEstate()
+            && ! empty($data['after_repair_value']) && ! empty($data['repair_estimate'])) {
+            $data['maximum_allowable_offer'] = ($data['after_repair_value'] * 0.70) - $data['repair_estimate'];
+        }
+
+        return $data;
+    }
+
+    /**
      * Store a property submitted by a field scout (standalone, no lead required).
      */
     public function fieldScoutStore(Request $request)

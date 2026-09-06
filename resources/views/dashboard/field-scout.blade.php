@@ -32,7 +32,7 @@
                 <h3 class="card-title">{{ __('Submit a Property') }}</h3>
             </div>
             <div class="card-body">
-                <form action="{{ route('properties.store') }}" method="POST">
+                <form action="{{ route('properties.field-scout.store') }}" method="POST">
                     @csrf
 
                     <div class="mb-3">

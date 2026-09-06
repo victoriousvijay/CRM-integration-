@@ -5,8 +5,11 @@
 
 @section('content')
 <div class="card">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <h3 class="card-title">{{ __('All Properties') }}</h3>
+        @can('create', \App\Models\Property::class)
+        <a href="{{ route('properties.create') }}" class="btn btn-primary btn-sm">{{ __('Add Property') }}</a>
+        @endcan
     </div>
     <div class="card-body border-bottom py-3">
         <form method="GET" action="{{ route('properties.index') }}" class="row g-2">
@@ -136,15 +139,31 @@
                     <td>{{ $property->square_footage ? number_format($property->square_footage) : '-' }}</td>
                     <td>{{ $property->year_built ?? '-' }}</td>
                     @endif
-                    <td>
+                    <td class="text-nowrap">
                         <a href="{{ route('properties.show', $property) }}" class="btn btn-ghost-secondary btn-sm">{{ __('View') }}</a>
+                        @can('update', $property)
+                        <a href="{{ route('properties.edit', $property) }}" class="btn btn-ghost-secondary btn-sm">{{ __('Edit') }}</a>
+                        @endcan
+                        @can('delete', $property)
+                        <form method="POST" action="{{ route('properties.destroy', $property) }}" class="d-inline"
+                              onsubmit="return confirm('{{ __('Delete this property? This cannot be undone.') }}');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-ghost-danger btn-sm">{{ __('Delete') }}</button>
+                        </form>
+                        @endcan
                     </td>
                 </tr>
                 @empty
                 <tr>
                     <td colspan="10" class="text-center text-secondary py-4">
                         <p class="mb-1">{{ __('No properties found.') }}</p>
-                        <small>{{ __('Try adjusting your filters or check back later as new properties are added.') }}</small>
+                        <small>{{ __('Try adjusting your filters, or add a property to get started.') }}</small>
+                        @can('create', \App\Models\Property::class)
+                        <div class="mt-3">
+                            <a href="{{ route('properties.create') }}" class="btn btn-primary">{{ __('Add Property') }}</a>
+                        </div>
+                        @endcan
                     </td>
                 </tr>
                 @endforelse

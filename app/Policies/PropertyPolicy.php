@@ -34,4 +34,16 @@ class PropertyPolicy
     {
         return $user->isAdmin() || $user->isFieldScout();
     }
+
+    public function update(User $user, Property $property): bool
+    {
+        return $this->create($user) && $this->view($user, $property);
+    }
+
+    public function delete(User $user, Property $property): bool
+    {
+        // Only admins remove records outright; agents edit but don't delete,
+        // and a property attached to a lead is part of that lead's history.
+        return $user->isAdmin() && $property->lead_id === null;
+    }
 }

@@ -12,8 +12,11 @@
 <div class="row">
     <div class="col-md-8">
         <div class="card mb-3">
-            <div class="card-header">
+            <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title">{{ __('Property Details') }}</h3>
+                @can('update', $property)
+                <a href="{{ route('properties.edit', $property) }}" class="btn btn-outline-primary btn-sm">{{ __('Edit') }}</a>
+                @endcan
             </div>
             <div class="card-body">
                 <div class="datagrid">
