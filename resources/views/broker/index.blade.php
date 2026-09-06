@@ -31,6 +31,12 @@
     @forelse($properties as $property)
         <div class="col-sm-6 col-lg-4">
             <div class="card h-100">
+                @if($property->primaryImage)
+                    <a href="{{ route('broker.show', $property) }}">
+                        <img src="{{ $property->primaryImage->url() }}" alt="{{ $property->address }}"
+                             class="card-img-top" style="height:180px;object-fit:cover;">
+                    </a>
+                @endif
                 <div class="card-body d-flex flex-column">
                     <h3 class="card-title mb-1">{{ $property->address }}</h3>
                     <p class="text-secondary mb-3">{{ $property->city }}, {{ $property->state }} {{ $property->zip_code }}</p>

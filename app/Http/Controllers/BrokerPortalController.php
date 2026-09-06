@@ -17,7 +17,7 @@ class BrokerPortalController extends Controller
      */
     public function index(Request $request)
     {
-        $query = $this->visibleProperties($request);
+        $query = $this->visibleProperties($request)->with('primaryImage');
 
         if ($request->filled('search')) {
             $search = $request->string('search')->toString();
@@ -45,6 +45,7 @@ class BrokerPortalController extends Controller
         // Resolved through the same visibility rule as the list, so a broker
         // can't reach an unshared property by guessing its id.
         $property = $this->visibleProperties($request)
+            ->with('images')
             ->whereKey($property->getKey())
             ->firstOrFail();
 

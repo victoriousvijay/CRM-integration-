@@ -5,6 +5,8 @@
 @section('content')
 <a href="{{ route('broker.index') }}" class="btn btn-outline-secondary mb-3">&larr; {{ __('Back to properties') }}</a>
 
+@include('properties._gallery')
+
 <div class="card">
     <div class="card-body">
         <h2 class="mb-1">{{ $property->address }}</h2>

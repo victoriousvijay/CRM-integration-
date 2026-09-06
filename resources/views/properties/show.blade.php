@@ -11,6 +11,8 @@
 @section('content')
 <div class="row">
     <div class="col-md-8">
+        @include('properties._gallery')
+
         <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title">{{ __('Property Details') }}</h3>

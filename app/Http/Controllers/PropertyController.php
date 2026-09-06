@@ -20,7 +20,7 @@ class PropertyController extends Controller
     {
         $this->authorize('viewAny', Property::class);
 
-        $query = Property::with('lead')->withCount('brokers');
+        $query = Property::with(['lead', 'primaryImage'])->withCount('brokers');
 
         if (auth()->user()->isAgent()) {
             $query->whereHas('lead', function ($q) {
@@ -125,6 +125,14 @@ class PropertyController extends Controller
         $property = Property::create($data);
         $this->syncBrokerAccess($request, $property);
 
+        if ($request->hasFile('images')) {
+            $request->validate([
+                'images.*' => 'file|mimes:jpg,jpeg,png,webp|max:'.PropertyImageController::MAX_KILOBYTES,
+            ]);
+
+            app(PropertyImageController::class)->attach($request->file('images'), $property);
+        }
+
         AuditLog::log('property.created', $property);
 
         return redirect()->route('properties.show', $property)
@@ -138,7 +146,7 @@ class PropertyController extends Controller
     {
         $this->authorize('update', $property);
 
-        $property->load('brokers');
+        $property->load(['brokers', 'images']);
 
         return view('properties.edit', ['property' => $property, 'brokers' => $this->brokers()]);
     }
@@ -286,7 +294,7 @@ class PropertyController extends Controller
     public function show(Property $property)
     {
         $this->authorize('view', $property);
-        $property->load('lead');
+        $property->load(['lead', 'images']);
 
         return view('properties.show', compact('property'));
     }

@@ -14,6 +14,7 @@ use App\Http\Controllers\LeadController;
 use App\Http\Controllers\ListController;
 use App\Http\Controllers\PluginController;
 use App\Http\Controllers\PropertyController;
+use App\Http\Controllers\PropertyImageController;
 use App\Http\Controllers\SequenceController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\InstallController;
@@ -153,6 +154,13 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
     // ── Open to ALL authenticated roles ──────────────────────────────
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Property photo bytes. Separate from the other property routes because
+    // brokers view these in their portal; the controller checks each
+    // requester's access to the property itself before serving anything.
+    Route::get('/properties/images/{image}', [PropertyImageController::class, 'show'])
+        ->middleware('role:admin,agent,acquisition_agent,field_scout,listing_agent,buyers_agent,broker')
+        ->name('properties.images.show');
 
     // ── Broker portal: the only screens a broker can reach ────────────
     // Admins are allowed in too, so they can see exactly what they shared
@@ -323,6 +331,11 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
         Route::get('/properties/{property}/edit', [PropertyController::class, 'edit'])->name('properties.edit');
         Route::put('/properties/{property}', [PropertyController::class, 'update'])->name('properties.update');
         Route::delete('/properties/{property}', [PropertyController::class, 'destroy'])->name('properties.destroy');
+
+        // Property photos.
+        Route::post('/properties/{property}/images', [PropertyImageController::class, 'store'])->name('properties.images.store');
+        Route::delete('/properties/images/{image}', [PropertyImageController::class, 'destroy'])->name('properties.images.destroy');
+        Route::patch('/properties/images/{image}/primary', [PropertyImageController::class, 'makePrimary'])->name('properties.images.primary');
     });
 
     // ── Field scout property submission: field_scout + admin ─────────

@@ -85,6 +85,22 @@ class Property extends Model
     }
 
     /**
+     * Photos of this property, cover image first.
+     */
+    public function images()
+    {
+        return $this->hasMany(PropertyImage::class)->orderByDesc('is_primary')->orderBy('sort_order');
+    }
+
+    /**
+     * The image used to represent this property in listings.
+     */
+    public function primaryImage()
+    {
+        return $this->hasOne(PropertyImage::class)->orderByDesc('is_primary')->orderBy('sort_order');
+    }
+
+    /**
      * Brokers this property has been shared with individually.
      */
     public function brokers()

@@ -95,6 +95,10 @@
                 @forelse($properties as $property)
                 <tr>
                     <td>
+                        @if($property->primaryImage)
+                            <img src="{{ $property->primaryImage->url() }}" alt=""
+                                 class="rounded me-2 align-middle" style="height:34px;width:44px;object-fit:cover;">
+                        @endif
                         {{ $property->full_address }}
                         @if(auth()->user()->isAdmin())
                             @if($property->shared_with_all_brokers)
