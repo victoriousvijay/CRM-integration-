@@ -85,6 +85,17 @@ class PropertyManagementTest extends TestCase
         $this->assertTrue($property->images()->first()->is_primary);
     }
 
+    public function test_a_property_without_a_lead_renders_in_the_list_and_detail_pages(): void
+    {
+        $property = Property::create($this->validPayload(['tenant_id' => $this->tenant->id]));
+
+        $this->assertNull($property->lead_id);
+
+        $this->actingAs($this->admin)->get(route('properties.index'))->assertOk();
+        $this->actingAs($this->admin)->get(route('properties.show', $property))->assertOk();
+        $this->actingAs($this->admin)->get(route('properties.edit', $property))->assertOk();
+    }
+
     public function test_property_can_be_shared_with_all_brokers(): void
     {
         $this->actingAs($this->admin)

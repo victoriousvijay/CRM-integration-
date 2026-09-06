@@ -109,7 +109,11 @@
                         @endif
                     </td>
                     <td>
-                        <a href="{{ route('leads.show', $property->lead_id) }}">{{ $property->lead->full_name ?? '-' }}</a>
+                        @if($property->lead)
+                            <a href="{{ route('leads.show', $property->lead) }}">{{ $property->lead->full_name }}</a>
+                        @else
+                            <span class="text-secondary">{{ __('Direct listing') }}</span>
+                        @endif
                     </td>
                     <td>{{ __(ucwords(str_replace('_', ' ', $property->property_type))) }}</td>
                     @if(($businessMode ?? 'wholesale') === 'wholesale')
