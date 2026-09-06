@@ -22,6 +22,38 @@ adapted rather than faked:
 | Logs | `storage/logs/laravel.log` | **stderr** (`LOG_CHANNEL=stderr`) — shows up in Vercel's runtime logs |
 | Laravel's own scratch files (compiled views, framework locks) | `storage/framework/*` | redirected to a per-invocation `/tmp` directory automatically — see `public/index.php`'s `insulaPrepareServerlessStoragePath()` and `bootstrap/app.php`'s `useStoragePath()` call; nothing to configure |
 
+### Put the function in the same region as the database
+
+This matters more than anything else on this page. Vercel defaults new
+projects to `iad1` (Washington DC); if the Supabase project is in, say,
+`ap-south-1` (Mumbai), every single query crosses an ocean. A CRM page runs
+dozens of queries, so a ~200 ms round trip turns a page load into 5–25
+seconds — the app looks broken rather than slow.
+
+`vercel.json` pins `"regions": ["bom1"]` (Mumbai) to match the Supabase
+region this deployment uses. **If you move the database, change this to the
+matching Vercel region** — the two must always agree. Vercel's region codes
+and their Supabase equivalents: `bom1`/`ap-south-1` (Mumbai),
+`iad1`/`us-east-1` (Virginia), `sfo1`/`us-west-1`, `fra1`/`eu-central-1`,
+`sin1`/`ap-southeast-1`, `syd1`/`ap-southeast-2`.
+
+Also use Supabase's **Session pooler** connection string (port 5432,
+`aws-0-<region>.pooler.supabase.com`, user `postgres.<project-ref>`) rather
+than the direct `db.<project-ref>.supabase.co` host: the direct host is
+IPv6-only, which serverless functions generally cannot reach.
+
+### Build-time cache warming
+
+Because every invocation is a fresh process, anything Laravel compiles once
+and reuses on a normal server is otherwise recompiled on every cold start.
+`scripts/build-serverless-cache.php` (wired to Composer's `post-install-cmd`,
+and a no-op unless `VERCEL` is set) runs `event:cache`, `route:cache` and
+`view:cache` during the build so the results ship inside the bundle;
+`public/index.php` then points Laravel at them and seeds `/tmp` with the
+pre-compiled Blade views. It deliberately does **not** run `config:cache` —
+that would freeze build-time environment values, so changing a variable in
+the Vercel dashboard would silently do nothing until the next deploy.
+
 **Trade-off to be explicit about:** Vercel Cron on the free/Hobby plan only
 allows daily schedules — `vercel.json` ships with `"0 7 * * *"` (once a
 day) for exactly this reason; deploying with a more frequent expression on

@@ -92,20 +92,49 @@ if (! function_exists('insulaPrepareServerlessStoragePath')) {
         // throws outright ("directory must be present and writable") when it
         // can't — which on a read-only serverless filesystem aborts provider
         // registration entirely, leaving core bindings like "view" missing.
-        // Point every cache path at /tmp so those writes succeed.
-        $envPaths = [
-            'LARAVEL_STORAGE_PATH' => $path,
-            'APP_SERVICES_CACHE' => $cachePath . '/services.php',
-            'APP_PACKAGES_CACHE' => $cachePath . '/packages.php',
-            'APP_CONFIG_CACHE' => $cachePath . '/config.php',
-            'APP_ROUTES_CACHE' => $cachePath . '/routes-v7.php',
-            'APP_EVENTS_CACHE' => $cachePath . '/events.php',
+        //
+        // Prefer the manifests baked into the deployment bundle at build time
+        // (see the post-install-cmd in composer.json): reading those skips
+        // both the write and the work of recompiling them, which on a
+        // stateless serverless host would otherwise happen on every cold
+        // start. Fall back to /tmp for anything the build didn't produce, so
+        // the write still succeeds instead of throwing.
+        $bundledCache = dirname(__DIR__) . '/bootstrap/cache';
+
+        $cacheFiles = [
+            'APP_SERVICES_CACHE' => 'services.php',
+            'APP_PACKAGES_CACHE' => 'packages.php',
+            'APP_CONFIG_CACHE' => 'config.php',
+            'APP_ROUTES_CACHE' => 'routes-v7.php',
+            'APP_EVENTS_CACHE' => 'events.php',
         ];
+
+        $envPaths = ['LARAVEL_STORAGE_PATH' => $path];
+
+        foreach ($cacheFiles as $key => $file) {
+            $envPaths[$key] = is_file($bundledCache . '/' . $file)
+                ? $bundledCache . '/' . $file
+                : $cachePath . '/' . $file;
+        }
 
         foreach ($envPaths as $key => $value) {
             putenv("{$key}={$value}");
             $_ENV[$key] = $value;
             $_SERVER[$key] = $value;
+        }
+
+        // Blade compiles every view it renders and caches the result under
+        // storage/framework/views. That storage lives in /tmp here and starts
+        // empty on each cold start, so seed it once from the views compiled
+        // during the build rather than recompiling the whole template tree.
+        $bundledViews = dirname(__DIR__) . '/storage/framework/views';
+        $runtimeViews = $path . '/framework/views';
+
+        if (is_dir($bundledViews) && ! is_file($runtimeViews . '/.seeded')) {
+            foreach (glob($bundledViews . '/*.php') ?: [] as $view) {
+                @copy($view, $runtimeViews . '/' . basename($view));
+            }
+            @touch($runtimeViews . '/.seeded');
         }
 
         return $path;

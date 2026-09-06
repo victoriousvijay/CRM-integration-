@@ -1,16 +1,31 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
+  "regions": ["bom1"],
   "builds": [
     { "src": "api/index.php", "use": "vercel-php@0.7.4" },
-    { "src": "public/build/**", "use": "@vercel/static" }
+    { "src": "public/build/**", "use": "@vercel/static" },
+    { "src": "public/css/**", "use": "@vercel/static" },
+    { "src": "public/img/**", "use": "@vercel/static" },
+    { "src": "public/images/**", "use": "@vercel/static" },
+    { "src": "public/js/**", "use": "@vercel/static" },
+    { "src": "public/embed.js", "use": "@vercel/static" },
+    { "src": "public/favicon.ico", "use": "@vercel/static" },
+    { "src": "public/robots.txt", "use": "@vercel/static" },
+    { "src": "public/manifest.json", "use": "@vercel/static" },
+    { "src": "public/service-worker.js", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/build/(.*)", "dest": "/public/build/$1" },
+    { "src": "/css/(.*)", "dest": "/public/css/$1" },
+    { "src": "/img/(.*)", "dest": "/public/img/$1" },
+    { "src": "/images/(.*)", "dest": "/public/images/$1" },
+    { "src": "/js/(.*)", "dest": "/public/js/$1" },
     { "src": "/favicon.ico", "dest": "/public/favicon.ico" },
     { "src": "/robots.txt", "dest": "/public/robots.txt" },
+    { "src": "/manifest.json", "dest": "/public/manifest.json" },
+    { "src": "/service-worker.js", "dest": "/public/service-worker.js" },
     { "src": "/embed.js", "dest": "/public/embed.js" },
-    { "src": "/images/(.*)", "dest": "/public/images/$1" },
     { "src": "/(.*)", "dest": "/api/index.php" }
   ],
   "crons": [

@@ -3,7 +3,14 @@
     "name": "victoriousvijay/crm-integration",
     "type": "project",
     "description": "Multi-tenant, white-label real estate CRM platform built on Laravel 12. Originally based on InsulaCRM (MIT licensed); see CREDITS.md.",
-    "keywords": ["crm", "real-estate", "white-label", "multi-tenant", "lead-management", "laravel"],
+    "keywords": [
+        "crm",
+        "real-estate",
+        "white-label",
+        "multi-tenant",
+        "lead-management",
+        "laravel"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",
@@ -66,6 +73,9 @@
         ],
         "pre-package-uninstall": [
             "Illuminate\\Foundation\\ComposerScripts::prePackageUninstall"
+        ],
+        "post-install-cmd": [
+            "@php scripts/build-serverless-cache.php"
         ]
     },
     "extra": {
