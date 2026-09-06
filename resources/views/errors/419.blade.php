@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-    <title>{{ __('Session Expired') }} - {{ config('app.name', 'InsulaCRM') }}</title>
+    <title>{{ __('Session Expired') }} - {{ \App\Support\Brand::name() }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
 </head>
@@ -12,7 +12,7 @@
         <div class="container container-tight py-4">
             <div class="text-center mb-4">
                 <a href="{{ url('/') }}">
-                    <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name') }}" style="max-height: 48px; max-width: 220px;">
+                    <img src="{{ asset('images/logo.png') }}" alt="{{ \App\Support\Brand::name() }}" style="max-height: 48px; max-width: 220px;">
                 </a>
             </div>
             <div class="card card-md">
@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div class="text-center text-muted mt-3 small">
-                {{ config('app.name', 'InsulaCRM') }}
+                {{ \App\Support\Brand::name() }}
             </div>
         </div>
     </div>

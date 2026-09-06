@@ -40,11 +40,11 @@
             </div>
         @endif
 
-        <form action="{{ route('install.run') }}" method="POST" data-busy-submit data-busy-message="{{ __('Installing InsulaCRM. Running migrations and creating your account — this may take a moment.') }}">
+        <form action="{{ route('install.run') }}" method="POST" data-busy-submit data-busy-message="{{ __('Installing :platform. Running migrations and creating your account — this may take a moment.', ['platform' => \App\Support\Brand::platformName()]) }}">
             @csrf
             <div class="mb-3">
                 <label class="form-label">{{ __('Application Name') }}</label>
-                <input type="text" name="app_name" class="form-control" value="InsulaCRM" required>
+                <input type="text" name="app_name" class="form-control" value="{{ \App\Support\Brand::platformName() }}" required>
             </div>
 
             <hr class="my-3">

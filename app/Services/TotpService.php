@@ -54,8 +54,13 @@ class TotpService
     /**
      * Get the otpauth:// URI for QR code generation.
      */
-    public function getQrUri(string $secret, string $email, string $issuer = 'InsulaCRM'): string
+    public function getQrUri(string $secret, string $email, ?string $issuer = null): string
     {
+        // The issuer is what the user sees naming this account in their
+        // authenticator app, so default it to whichever brand they signed in
+        // under rather than the platform's own name.
+        $issuer ??= \App\Support\Brand::name();
+
         return sprintf(
             'otpauth://totp/%s:%s?secret=%s&issuer=%s&digits=6&period=30',
             rawurlencode($issuer),

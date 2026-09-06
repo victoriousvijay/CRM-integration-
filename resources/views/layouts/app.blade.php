@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', __('Dashboard')) - {{ config('app.name') }}</title>
+    <title>@yield('title', __('Dashboard')) - {{ \App\Support\Brand::name() }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler-vendors.min.css">
@@ -99,9 +99,9 @@
                     <a href="{{ route('dashboard') }}">
                         @php $tenantLogo = auth()->user()->tenant->logo_path ?? null; @endphp
                         @if($tenantLogo)
-                            <img src="{{ asset('storage/' . $tenantLogo) }}" alt="{{ config('app.name') }}" style="max-height: 56px; max-width: 220px;">
+                            <img src="{{ asset('storage/' . $tenantLogo) }}" alt="{{ \App\Support\Brand::name() }}" style="max-height: 56px; max-width: 220px;">
                         @else
-                            <img src="{{ asset('images/logo-white.png') }}" alt="{{ config('app.name') }}" style="max-height: 84px; max-width: 330px;">
+                            <img src="{{ asset('images/logo-white.png') }}" alt="{{ \App\Support\Brand::name() }}" style="max-height: 84px; max-width: 330px;">
                         @endif
                     </a>
                 </h1>

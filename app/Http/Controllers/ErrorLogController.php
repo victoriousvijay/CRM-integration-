@@ -89,7 +89,7 @@ class ErrorLogController extends Controller
         }
 
         $report = [
-            'product' => 'InsulaCRM',
+            'product' => config('platform.name'),
             'version' => config('app.version', '1.0.0'),
             'php_version' => PHP_VERSION,
             'laravel_version' => app()->version(),

@@ -1,5 +1,5 @@
 /**
- * InsulaCRM Service Worker
+ * Service Worker
  * Provides offline support and caching for the PWA experience.
  *
  * Cache strategies:

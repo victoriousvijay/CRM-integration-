@@ -19,7 +19,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted">
-                    {{ __('Generate a private iCal feed URL to subscribe to your InsulaCRM tasks and activities in your favorite calendar app.') }}
+                    {{ __('Generate a private iCal feed URL to subscribe to your ') }}{{ \App\Support\Brand::name() }}{{ __(' tasks and activities in your favorite calendar app.') }}
                 </p>
 
                 @if($hasToken && $feedUrl)
@@ -143,7 +143,7 @@
             </div>
             <div class="card-body">
                 <p class="text-muted">
-                    {{ __('Import events from an external iCal (.ics) URL. Each event will be created as a task in InsulaCRM.') }}
+                    {{ __('Import events from an external iCal (.ics) URL. Each event will be created as a task in ') }}{{ \App\Support\Brand::name() }}{{ __('.') }}
                 </p>
 
                 <form action="{{ route('calendar.sync.import') }}" method="POST">

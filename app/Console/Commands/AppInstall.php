@@ -25,18 +25,18 @@ class AppInstall extends Command
         {--load-demo-data : Seed optional demo data after install}
         {--force : Continue even if the app already appears installed}';
 
-    protected $description = 'Install InsulaCRM from the command line using the current or supplied environment settings';
+    protected $description = 'Install the CRM from the command line using the current or supplied environment settings';
 
     public function handle(InstallerService $installer): int
     {
         if (! $this->option('force') && $this->isAlreadyInstalled()) {
-            $this->error('InsulaCRM already appears to be installed. Use --force only if you intend to rerun the installer logic.');
+            $this->error(config('platform.name').' already appears to be installed. Use --force only if you intend to rerun the installer logic.');
 
             return self::FAILURE;
         }
 
         $payload = [
-            'app_name' => $this->option('app-name') ?: $this->ask('Application name', 'InsulaCRM'),
+            'app_name' => $this->option('app-name') ?: $this->ask('Application name', config('platform.name')),
             'app_url' => $this->option('app-url') ?: $this->ask('Application URL', config('app.url')),
             'company_name' => $this->option('company-name') ?: $this->ask('Company name'),
             'admin_name' => $this->option('admin-name') ?: $this->ask('Administrator name'),
@@ -99,7 +99,7 @@ class AppInstall extends Command
 
         $tenant = $result['tenant'];
         $this->newLine();
-        $this->info('InsulaCRM installation completed.');
+        $this->info(config('platform.name').' installation completed.');
         $this->table(
             ['Item', 'Value'],
             [

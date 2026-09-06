@@ -96,6 +96,29 @@ Route::get('/p/{slug}/properties', [BuyerPortalController::class, 'properties'])
 // Offline fallback (PWA)
 Route::get('/offline', fn () => view('offline'))->name('offline');
 
+// PWA manifest. Served by the app rather than as a static file so the
+// installed app carries the signed-in tenant's brand — on a white-label
+// platform a client's staff should be installing their own company's app,
+// not the platform's.
+Route::get('/manifest.json', function () {
+    return response()->json([
+        'name' => \App\Support\Brand::name(),
+        'short_name' => \App\Support\Brand::name(),
+        'description' => config('platform.tagline'),
+        'start_url' => url('/dashboard'),
+        'scope' => url('/').'/',
+        'display' => 'standalone',
+        'background_color' => '#ffffff',
+        'theme_color' => '#0054a6',
+        'orientation' => 'any',
+        'categories' => ['business', 'productivity'],
+        'icons' => [
+            ['src' => asset('img/icon-192.png'), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any maskable'],
+            ['src' => asset('img/icon-512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any maskable'],
+        ],
+    ])->header('Content-Type', 'application/manifest+json');
+})->name('pwa.manifest');
+
 // Vercel Cron target — runs the scheduler + drains queued jobs. See
 // App\Http\Controllers\CronController and DEPLOYMENT.md. Secret-protected,
 // not session-authenticated (Vercel Cron can't hold a login session).

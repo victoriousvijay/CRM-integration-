@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         initBroadcastListeners(echoInstance);
     } catch (e) {
-        console.log('InsulaCRM: Broadcasting unavailable, using polling fallback.');
+        console.log('CRM: Broadcasting unavailable, using polling fallback.');
     }
 });
 </script>
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         initBroadcastListeners(echoInstance);
     } catch (e) {
-        console.log('InsulaCRM: Broadcasting unavailable, using polling fallback.');
+        console.log('CRM: Broadcasting unavailable, using polling fallback.');
     }
 });
 </script>

@@ -8,7 +8,7 @@
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">{{ __('Welcome to :app!', ['app' => config('app.name')]) }}</h3>
+                <h3 class="card-title">{{ __('Welcome to :app!', ['app' => \App\Support\Brand::name()]) }}</h3>
                 <div class="card-actions">
                     <a href="{{ route('onboarding.skip') }}" class="btn btn-ghost-secondary btn-sm">{{ __('Skip Setup') }}</a>
                 </div>

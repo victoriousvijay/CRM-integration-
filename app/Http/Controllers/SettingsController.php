@@ -252,7 +252,7 @@ class SettingsController extends Controller
         try {
             $result = $provider->send(
                 $request->to,
-                __('This is a test message from :app.', ['app' => $tenant->name ?? 'InsulaCRM'])
+                __('This is a test message from :app.', ['app' => $tenant->name ?? config('platform.name')])
             );
 
             if ($result) {
@@ -1091,7 +1091,7 @@ class SettingsController extends Controller
             \Illuminate\Support\Facades\Mail::raw(
                 __('This is a test email from :name. Your SMTP settings are working correctly!', ['name' => $tenant->name]),
                 function ($message) use ($user) {
-                    $message->to($user->email)->subject(__('Test Email from InsulaCRM'));
+                    $message->to($user->email)->subject(__('Test Email from :brand', ['brand' => \App\Support\Brand::name()]));
                 }
             );
 

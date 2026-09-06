@@ -20,7 +20,7 @@
                 </h3>
             </div>
             <div class="card-body">
-                <p>{{ __('InsulaCRM webhooks send real-time HTTP POST requests to URLs you configure whenever specific events occur in your CRM. This allows you to connect InsulaCRM to thousands of external services.') }}</p>
+                <p>{{ __(':brand webhooks send real-time HTTP POST requests to URLs you configure whenever specific events occur in your CRM. This allows you to connect :brand to thousands of external services.', ['brand' => \App\Support\Brand::name()]) }}</p>
 
                 <div class="row g-3 mt-2">
                     <div class="col-md-4">
@@ -35,7 +35,7 @@
                         <div class="card card-sm bg-azure-lt border-0">
                             <div class="card-body">
                                 <h4 class="mb-1">{{ __('2. Event Fires') }}</h4>
-                                <p class="text-secondary small mb-0">{{ __('When the event occurs (e.g., new lead created), InsulaCRM sends a JSON POST request to your URL.') }}</p>
+                                <p class="text-secondary small mb-0">{{ __('When the event occurs (e.g., new lead created), :brand sends a JSON POST request to your URL.', ['brand' => \App\Support\Brand::name()]) }}</p>
                             </div>
                         </div>
                     </div>
@@ -51,7 +51,7 @@
 
                 <div class="mt-3">
                     <h4>{{ __('Security') }}</h4>
-                    <p class="text-secondary mb-0">{{ __('All webhook payloads can be signed with HMAC-SHA256 using a shared secret. The signature is sent in the') }} <code>X-Webhook-Signature</code> {{ __('header, allowing you to verify the request came from InsulaCRM.') }}</p>
+                    <p class="text-secondary mb-0">{{ __('All webhook payloads can be signed with HMAC-SHA256 using a shared secret. The signature is sent in the') }} <code>X-Webhook-Signature</code> {{ __('header, allowing you to verify the request came from :brand.', ['brand' => \App\Support\Brand::name()]) }}</p>
                 </div>
             </div>
         </div>
@@ -303,14 +303,14 @@
                 </h3>
             </div>
             <div class="card-body">
-                <p class="text-secondary">{{ __('Zapier connects InsulaCRM to 6,000+ apps. Use the "Webhooks by Zapier" trigger to receive events from InsulaCRM.') }}</p>
+                <p class="text-secondary">{{ __('Zapier connects :brand to 6,000+ apps. Use the "Webhooks by Zapier" trigger to receive events from :brand.', ['brand' => \App\Support\Brand::name()]) }}</p>
 
                 <div class="accordion" id="zapier-accordion">
                     {{-- Google Sheets --}}
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#zapier-sheets">
-                                <strong>{{ __('InsulaCRM -> Google Sheets') }}</strong>
+                                <strong>{{ __(':brand -> Google Sheets', ['brand' => \App\Support\Brand::name()]) }}</strong>
                                 <span class="ms-2 text-secondary small">{{ __('Log new leads to a spreadsheet') }}</span>
                             </button>
                         </h2>
@@ -327,12 +327,12 @@
                                         <strong>{{ __('Copy the webhook URL') }}</strong> {{ __('that Zapier provides (looks like') }} <code>https://hooks.zapier.com/hooks/catch/...</code>)
                                     </li>
                                     <li class="mb-2">
-                                        <strong>{{ __('In InsulaCRM:') }}</strong> {{ __('Go to') }}
+                                        <strong>{{ __('In :brand:', ['brand' => \App\Support\Brand::name()]) }}</strong> {{ __('Go to') }}
                                         <a href="{{ route('settings.index', ['tab' => 'webhooks']) }}">{{ __('Settings') }} > {{ __('Webhooks') }}</a>
                                         {{ __('and add a new webhook with the Zapier URL. Select the') }} <code>lead.created</code> {{ __('event.') }}
                                     </li>
                                     <li class="mb-2">
-                                        <strong>{{ __('Test:') }}</strong> {{ __('Create a test lead in InsulaCRM, then click "Test trigger" in Zapier to verify data is received.') }}
+                                        <strong>{{ __('Test:') }}</strong> {{ __('Create a test lead in :brand, then click "Test trigger" in Zapier to verify data is received.', ['brand' => \App\Support\Brand::name()]) }}
                                     </li>
                                     <li class="mb-2">
                                         <strong>{{ __('Action:') }}</strong> {{ __('Choose "Google Sheets" and select "Create Spreadsheet Row". Connect your Google account.') }}
@@ -360,7 +360,7 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#zapier-slack">
-                                <strong>{{ __('InsulaCRM -> Slack') }}</strong>
+                                <strong>{{ __(':brand -> Slack', ['brand' => \App\Support\Brand::name()]) }}</strong>
                                 <span class="ms-2 text-secondary small">{{ __('Get notified of deal stage changes') }}</span>
                             </button>
                         </h2>
@@ -374,7 +374,7 @@
                                         <strong>{{ __('Trigger:') }}</strong> {{ __('Choose "Webhooks by Zapier" > "Catch Hook".') }}
                                     </li>
                                     <li class="mb-2">
-                                        <strong>{{ __('Copy the webhook URL') }}</strong> {{ __('and add it in InsulaCRM') }}
+                                        <strong>{{ __('Copy the webhook URL') }}</strong> {{ __('and add it in :brand', ['brand' => \App\Support\Brand::name()]) }}
                                         (<a href="{{ route('settings.index', ['tab' => 'webhooks']) }}">{{ __('Settings') }} > {{ __('Webhooks') }}</a>)
                                         {{ __('with the') }} <code>deal.stage_changed</code> {{ __('event selected.') }}
                                     </li>
@@ -399,7 +399,7 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#zapier-mailchimp">
-                                <strong>{{ __('InsulaCRM -> Mailchimp') }}</strong>
+                                <strong>{{ __(':brand -> Mailchimp', ['brand' => \App\Support\Brand::name()]) }}</strong>
                                 <span class="ms-2 text-secondary small">{{ __('Add new leads to an email list') }}</span>
                             </button>
                         </h2>
@@ -410,7 +410,7 @@
                                         <strong>{{ __('Create a new Zap') }}</strong> {{ __('with "Webhooks by Zapier" > "Catch Hook" trigger.') }}
                                     </li>
                                     <li class="mb-2">
-                                        <strong>{{ __('Add webhook in InsulaCRM') }}</strong> {{ __('with the') }} <code>lead.created</code> {{ __('event.') }}
+                                        <strong>{{ __('Add webhook in :brand', ['brand' => \App\Support\Brand::name()]) }}</strong> {{ __('with the') }} <code>lead.created</code> {{ __('event.') }}
                                     </li>
                                     <li class="mb-2">
                                         <strong>{{ __('Action:') }}</strong> {{ __('Choose "Mailchimp" > "Add/Update Subscriber". Connect your Mailchimp account.') }}
@@ -435,7 +435,7 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#zapier-calendar">
-                                <strong>{{ __('InsulaCRM -> Google Calendar') }}</strong>
+                                <strong>{{ __(':brand -> Google Calendar', ['brand' => \App\Support\Brand::name()]) }}</strong>
                                 <span class="ms-2 text-secondary small">{{ __('Create events for deal closings') }}</span>
                             </button>
                         </h2>
@@ -446,7 +446,7 @@
                                         <strong>{{ __('Create a new Zap') }}</strong> {{ __('with "Webhooks by Zapier" > "Catch Hook" trigger.') }}
                                     </li>
                                     <li class="mb-2">
-                                        <strong>{{ __('Add webhook in InsulaCRM') }}</strong> {{ __('with the') }} <code>deal.stage_changed</code> {{ __('event.') }}
+                                        <strong>{{ __('Add webhook in :brand', ['brand' => \App\Support\Brand::name()]) }}</strong> {{ __('with the') }} <code>deal.stage_changed</code> {{ __('event.') }}
                                     </li>
                                     <li class="mb-2">
                                         <strong>{{ __('Add a Filter step:') }}</strong> {{ __('Only continue if') }} <code>data.new_stage</code> {{ __('equals') }} <code>closing</code>.
@@ -482,14 +482,14 @@
                 </h3>
             </div>
             <div class="card-body">
-                <p class="text-secondary">{{ __('Make (formerly Integromat) offers powerful visual automation with branching logic, routers, and error handling. Use the "Webhooks" module to receive InsulaCRM events.') }}</p>
+                <p class="text-secondary">{{ __('Make (formerly Integromat) offers powerful visual automation with branching logic, routers, and error handling. Use the "Webhooks" module to receive :brand events.', ['brand' => \App\Support\Brand::name()]) }}</p>
 
                 <div class="accordion" id="make-accordion">
                     {{-- Make: Google Sheets --}}
                     <div class="accordion-item">
                         <h2 class="accordion-header">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#make-sheets">
-                                <strong>{{ __('InsulaCRM -> Google Sheets (via Make)') }}</strong>
+                                <strong>{{ __(':brand -> Google Sheets (via Make)', ['brand' => \App\Support\Brand::name()]) }}</strong>
                                 <span class="ms-2 text-secondary small">{{ __('Log leads with advanced filtering') }}</span>
                             </button>
                         </h2>
@@ -503,12 +503,12 @@
                                         <strong>{{ __('Add Webhook module:') }}</strong> {{ __('Choose "Webhooks" > "Custom webhook". Click "Add" to create a new webhook and copy the URL.') }}
                                     </li>
                                     <li class="mb-2">
-                                        <strong>{{ __('Add webhook in InsulaCRM:') }}</strong> {{ __('Paste the Make webhook URL in') }}
+                                        <strong>{{ __('Add webhook in :brand:', ['brand' => \App\Support\Brand::name()]) }}</strong> {{ __('Paste the Make webhook URL in') }}
                                         <a href="{{ route('settings.index', ['tab' => 'webhooks']) }}">{{ __('Settings') }} > {{ __('Webhooks') }}</a>
                                         {{ __('with') }} <code>lead.created</code> {{ __('event.') }}
                                     </li>
                                     <li class="mb-2">
-                                        <strong>{{ __('Determine data structure:') }}</strong> {{ __('Create a test lead in InsulaCRM, then click "Re-determine data structure" in Make.') }}
+                                        <strong>{{ __('Determine data structure:') }}</strong> {{ __('Create a test lead in :brand, then click "Re-determine data structure" in Make.', ['brand' => \App\Support\Brand::name()]) }}
                                     </li>
                                     <li class="mb-2">
                                         <strong>{{ __('Add a Router (optional):') }}</strong> {{ __('Route leads to different sheets based on temperature (hot/warm/cold) or property type.') }}
@@ -570,7 +570,7 @@
             </div>
             <div class="card-body">
                 <h4 class="mb-3">{{ __('Testing with cURL') }}</h4>
-                <p class="text-secondary">{{ __('Test your webhook endpoint by simulating an InsulaCRM payload:') }}</p>
+                <p class="text-secondary">{{ __('Test your webhook endpoint by simulating an :brand payload:', ['brand' => \App\Support\Brand::name()]) }}</p>
                 <pre class="bg-dark text-light p-3 rounded"><code>curl -X POST https://your-endpoint.com/webhook \
   -H "Content-Type: application/json" \
   -H "X-Webhook-Signature: sha256=YOUR_SIGNATURE" \
@@ -619,13 +619,13 @@
                             <tr><td><code>Content-Type</code></td><td><code>application/json</code></td></tr>
                             <tr><td><code>X-Webhook-Event</code></td><td>{{ __('The event name') }}</td></tr>
                             <tr><td><code>X-Webhook-Signature</code></td><td>{{ __('HMAC-SHA256 signature (if secret is configured)') }}</td></tr>
-                            <tr><td><code>User-Agent</code></td><td><code>InsulaCRM-Webhook/1.0</code></td></tr>
+                            <tr><td><code>User-Agent</code></td><td><code>{{ \App\Support\Brand::platformName() }}-Webhook/1.0</code></td></tr>
                         </tbody>
                     </table>
                 </div>
 
                 <h4 class="mt-4 mb-3">{{ __('HMAC Signature Verification') }}</h4>
-                <p class="text-secondary">{{ __('If you set a webhook secret, InsulaCRM signs every payload with HMAC-SHA256. Verify the signature on your end to ensure the request is authentic.') }}</p>
+                <p class="text-secondary">{{ __('If you set a webhook secret, :brand signs every payload with HMAC-SHA256. Verify the signature on your end to ensure the request is authentic.', ['brand' => \App\Support\Brand::name()]) }}</p>
 
                 <div class="mb-3">
                     <h5>{{ __('PHP Example') }}</h5>
@@ -718,7 +718,7 @@ app.post('/webhook', express.json({ verify: (req, res, buf) => {
                     </li>
                     <li class="mb-3">
                         <strong>{{ __('Handle retries') }}</strong>
-                        <p class="text-secondary small mb-0">{{ __('InsulaCRM retries failed webhooks up to 3 times with exponential backoff. Make your handler idempotent.') }}</p>
+                        <p class="text-secondary small mb-0">{{ __(':brand retries failed webhooks up to 3 times with exponential backoff. Make your handler idempotent.', ['brand' => \App\Support\Brand::name()]) }}</p>
                     </li>
                     <li class="mb-3">
                         <strong>{{ __('Monitor failures') }}</strong>
@@ -738,7 +738,7 @@ app.post('/webhook', express.json({ verify: (req, res, buf) => {
                 <h3 class="card-title">{{ __('Works With') }}</h3>
             </div>
             <div class="card-body">
-                <p class="text-secondary small">{{ __('InsulaCRM webhooks are standard HTTP POST requests, compatible with any service that accepts webhooks:') }}</p>
+                <p class="text-secondary small">{{ __(':brand webhooks are standard HTTP POST requests, compatible with any service that accepts webhooks:', ['brand' => \App\Support\Brand::name()]) }}</p>
                 <div class="d-flex flex-wrap gap-2">
                     <span class="badge bg-blue-lt">Zapier</span>
                     <span class="badge bg-blue-lt">Make</span>
