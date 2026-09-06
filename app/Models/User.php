@@ -133,6 +133,11 @@ class User extends Authenticatable
         return $this->hasRole('field_scout');
     }
 
+    public function isBroker(): bool
+    {
+        return $this->hasRole('broker');
+    }
+
     public function isListingAgent(): bool
     {
         return $this->hasRole('listing_agent');

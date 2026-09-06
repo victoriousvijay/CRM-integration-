@@ -42,6 +42,7 @@ use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\Api\WebFormController;
 use App\Http\Controllers\ApiCredentialController;
+use App\Http\Controllers\BrokerPortalController;
 use App\Http\Controllers\BuyerPortalController;
 use App\Http\Controllers\BuyerPortalSettingsController;
 use App\Http\Controllers\WebhookRecipeController;
@@ -152,6 +153,14 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
     // ── Open to ALL authenticated roles ──────────────────────────────
     Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // ── Broker portal: the only screens a broker can reach ────────────
+    // Admins are allowed in too, so they can see exactly what they shared
+    // without keeping a second account.
+    Route::middleware('role:admin,broker')->prefix('broker')->name('broker.')->group(function () {
+        Route::get('/', [BrokerPortalController::class, 'index'])->name('index');
+        Route::get('/properties/{property}', [BrokerPortalController::class, 'show'])->name('show');
+    });
     Route::post('/dashboard/widgets', [DashboardController::class, 'updateWidgets'])->name('dashboard.updateWidgets');
     // Dashboard data API (field scouts have no charts, so exclude them)
     Route::get('/api/dashboard-data', [ReportController::class, 'dashboardData'])

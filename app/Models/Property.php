@@ -37,6 +37,7 @@ class Property extends Model
         'listed_at',
         'sold_at',
         'sold_price',
+        'shared_with_all_brokers',
         'notes',
     ];
 
@@ -50,6 +51,7 @@ class Property extends Model
             'our_offer' => 'decimal:2',
             'maximum_allowable_offer' => 'decimal:2',
             'distress_markers' => 'array',
+            'shared_with_all_brokers' => 'boolean',
             'list_price' => 'decimal:2',
             'sold_price' => 'decimal:2',
             'listed_at' => 'date',
@@ -80,6 +82,28 @@ class Property extends Model
     public function lead()
     {
         return $this->belongsTo(Lead::class);
+    }
+
+    /**
+     * Brokers this property has been shared with individually.
+     */
+    public function brokers()
+    {
+        return $this->belongsToMany(User::class, 'property_broker')
+            ->withPivot(['assigned_by', 'assigned_at'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Limit to properties a given broker may see: those shared with every
+     * broker, plus those assigned to them specifically.
+     */
+    public function scopeVisibleToBroker($query, User $broker)
+    {
+        return $query->where(function ($q) use ($broker) {
+            $q->where('shared_with_all_brokers', true)
+                ->orWhereHas('brokers', fn ($b) => $b->where('users.id', $broker->id));
+        });
     }
 
     public function tenant()

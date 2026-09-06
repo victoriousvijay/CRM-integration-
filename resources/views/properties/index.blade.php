@@ -94,7 +94,16 @@
             <tbody>
                 @forelse($properties as $property)
                 <tr>
-                    <td>{{ $property->full_address }}</td>
+                    <td>
+                        {{ $property->full_address }}
+                        @if(auth()->user()->isAdmin())
+                            @if($property->shared_with_all_brokers)
+                                <span class="badge bg-green-lt ms-1">{{ __('All brokers') }}</span>
+                            @elseif($property->brokers_count)
+                                <span class="badge bg-blue-lt ms-1">{{ trans_choice(':count broker|:count brokers', $property->brokers_count, ['count' => $property->brokers_count]) }}</span>
+                            @endif
+                        @endif
+                    </td>
                     <td>
                         <a href="{{ route('leads.show', $property->lead_id) }}">{{ $property->lead->full_name ?? '-' }}</a>
                     </td>

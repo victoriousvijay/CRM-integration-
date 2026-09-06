@@ -25,6 +25,12 @@ class DashboardController extends Controller
             return view('dashboard.field-scout');
         }
 
+        // Brokers have no access to any CRM screen — their whole product is
+        // the property portal, so send them straight there.
+        if ($user->isBroker()) {
+            return redirect()->route('broker.index');
+        }
+
         $leadQuery = Lead::query();
         $dealQuery = Deal::query();
         $taskQuery = Task::query();

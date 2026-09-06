@@ -131,13 +131,13 @@ class BusinessModeService
     // ── Wholesale roles ──
 
     public const WHOLESALE_ROLES = [
-        'admin', 'acquisition_agent', 'disposition_agent', 'field_scout', 'agent',
+        'admin', 'acquisition_agent', 'disposition_agent', 'field_scout', 'agent', 'broker',
     ];
 
     // ── Real estate roles ──
 
     public const REALESTATE_ROLES = [
-        'admin', 'listing_agent', 'buyers_agent', 'agent',
+        'admin', 'listing_agent', 'buyers_agent', 'agent', 'broker',
     ];
 
     /**

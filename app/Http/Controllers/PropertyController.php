@@ -20,7 +20,7 @@ class PropertyController extends Controller
     {
         $this->authorize('viewAny', Property::class);
 
-        $query = Property::with('lead');
+        $query = Property::with('lead')->withCount('brokers');
 
         if (auth()->user()->isAgent()) {
             $query->whereHas('lead', function ($q) {
@@ -110,7 +110,7 @@ class PropertyController extends Controller
     {
         $this->authorize('create', Property::class);
 
-        return view('properties.create');
+        return view('properties.create', ['brokers' => $this->brokers()]);
     }
 
     /**
@@ -123,6 +123,7 @@ class PropertyController extends Controller
         $data = $this->prepare($request->validated());
 
         $property = Property::create($data);
+        $this->syncBrokerAccess($request, $property);
 
         AuditLog::log('property.created', $property);
 
@@ -137,7 +138,9 @@ class PropertyController extends Controller
     {
         $this->authorize('update', $property);
 
-        return view('properties.edit', compact('property'));
+        $property->load('brokers');
+
+        return view('properties.edit', ['property' => $property, 'brokers' => $this->brokers()]);
     }
 
     /**
@@ -148,6 +151,7 @@ class PropertyController extends Controller
         $this->authorize('update', $property);
 
         $property->update($this->prepare($request->validated()));
+        $this->syncBrokerAccess($request, $property);
 
         AuditLog::log('property.updated', $property);
 
@@ -168,6 +172,62 @@ class PropertyController extends Controller
 
         return redirect()->route('properties.index')
             ->with('success', __('Property deleted.'));
+    }
+
+    /**
+     * Brokers in this tenant who a property can be shared with.
+     *
+     * @return \Illuminate\Support\Collection<int, \App\Models\User>
+     */
+    protected function brokers()
+    {
+        return \App\Models\User::whereHas('role', fn ($q) => $q->where('name', 'broker'))
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Apply the submitted broker access choice to a property.
+     *
+     * Three states, and only an admin may change them: shared with nobody,
+     * shared with every broker (including ones added later, hence the flag
+     * rather than filling the pivot), or shared with a named few.
+     */
+    protected function syncBrokerAccess(Request $request, Property $property): void
+    {
+        if (! auth()->user()->isAdmin()) {
+            return;
+        }
+
+        $mode = $request->input('broker_access', 'none');
+
+        if ($mode === 'all') {
+            $property->update(['shared_with_all_brokers' => true]);
+            $property->brokers()->detach();
+
+            return;
+        }
+
+        $property->update(['shared_with_all_brokers' => false]);
+
+        if ($mode !== 'selected') {
+            $property->brokers()->detach();
+
+            return;
+        }
+
+        $brokerIds = $this->brokers()
+            ->whereIn('id', (array) $request->input('broker_ids', []))
+            ->pluck('id');
+
+        $property->brokers()->sync(
+            $brokerIds->mapWithKeys(fn ($id) => [$id => [
+                'tenant_id' => $property->tenant_id,
+                'assigned_by' => auth()->id(),
+                'assigned_at' => now(),
+            ]])->all()
+        );
     }
 
     /**

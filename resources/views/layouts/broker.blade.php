@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', __('Properties')) - {{ \App\Support\Brand::name() }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
+</head>
+<body class="d-flex flex-column">
+<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js" defer></script>
+
+<header class="navbar navbar-expand-md navbar-light d-print-none border-bottom bg-white">
+    <div class="container-xl">
+        <h1 class="navbar-brand navbar-brand-autodark mb-0 me-3">
+            <a href="{{ route('broker.index') }}">
+                <img src="{{ \App\Support\Brand::logo() }}" alt="{{ \App\Support\Brand::name() }}" style="max-height:40px;max-width:180px;">
+            </a>
+        </h1>
+
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="text-secondary d-none d-sm-inline">{{ auth()->user()->name }}</span>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="btn btn-outline-secondary btn-sm">{{ __('Sign out') }}</button>
+            </form>
+        </div>
+    </div>
+</header>
+
+<div class="page-wrapper">
+    <div class="page-body">
+        <div class="container-xl">
+            @if(session('success'))
+                <div class="alert alert-success">{{ session('success') }}</div>
+            @endif
+
+            @yield('content')
+        </div>
+    </div>
+</div>
+</body>
+</html>

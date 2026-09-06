@@ -195,3 +195,61 @@
         @error('notes')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
 </div>
+
+@if(auth()->user()->isAdmin())
+@php
+    $assignedBrokerIds = $property?->brokers?->pluck('id')->all() ?? [];
+    $currentAccess = old('broker_access', match (true) {
+        (bool) ($property?->shared_with_all_brokers) => 'all',
+        $assignedBrokerIds !== [] => 'selected',
+        default => 'none',
+    });
+    $selectedBrokerIds = array_map('intval', (array) old('broker_ids', $assignedBrokerIds));
+@endphp
+<div class="card mt-3">
+    <div class="card-body">
+        <h3 class="card-title">{{ __('Broker Access') }}</h3>
+        <p class="text-secondary">{{ __('Choose which brokers can see this property in their portal.') }}</p>
+
+        <label class="form-check">
+            <input class="form-check-input" type="radio" name="broker_access" value="none"
+                   @checked($currentAccess === 'none') data-broker-access>
+            <span class="form-check-label">{{ __('No brokers') }}</span>
+        </label>
+        <label class="form-check">
+            <input class="form-check-input" type="radio" name="broker_access" value="all"
+                   @checked($currentAccess === 'all') data-broker-access>
+            <span class="form-check-label">{{ __('All brokers') }}</span>
+            <span class="form-check-description">{{ __('Includes brokers you add later.') }}</span>
+        </label>
+        <label class="form-check">
+            <input class="form-check-input" type="radio" name="broker_access" value="selected"
+                   @checked($currentAccess === 'selected') data-broker-access>
+            <span class="form-check-label">{{ __('Specific brokers') }}</span>
+        </label>
+
+        <div id="broker-picker" class="mt-2 ps-4" @class(['d-none' => $currentAccess !== 'selected'])>
+            @forelse($brokers ?? [] as $broker)
+                <label class="form-check">
+                    <input class="form-check-input" type="checkbox" name="broker_ids[]" value="{{ $broker->id }}"
+                           @checked(in_array($broker->id, $selectedBrokerIds, true))>
+                    <span class="form-check-label">{{ $broker->name }} <span class="text-secondary">({{ $broker->email }})</span></span>
+                </label>
+            @empty
+                <p class="text-secondary mb-0">
+                    {{ __('No broker accounts yet.') }}
+                    <a href="{{ route('settings.index', ['tab' => 'team']) }}">{{ __('Add one under Settings → Team.') }}</a>
+                </p>
+            @endforelse
+        </div>
+    </div>
+</div>
+
+<script>
+    document.querySelectorAll('[data-broker-access]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            document.getElementById('broker-picker').classList.toggle('d-none', this.value !== 'selected');
+        });
+    });
+</script>
+@endif
