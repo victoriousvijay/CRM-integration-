@@ -42,7 +42,12 @@ class CheckInstalled
 
     private function isInstalled(): bool
     {
-        if (! File::exists(base_path('.env'))) {
+        // A missing .env only means "not installed" on a host where config
+        // actually comes from a file. Platforms like Vercel inject config as
+        // real environment variables and have a read-only filesystem, so
+        // there is no .env to find — treat a configured APP_KEY as equivalent
+        // evidence that the app has been set up.
+        if (! File::exists(base_path('.env')) && ! config('app.key')) {
             return false;
         }
 
