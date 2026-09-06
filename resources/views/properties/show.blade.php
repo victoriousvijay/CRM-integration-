@@ -14,6 +14,14 @@
         @include('properties._gallery')
 
         <div class="card mb-3">
+            <div class="card-body py-2">
+                <a href="{{ $property->map_link }}" target="_blank" rel="noopener noreferrer">
+                    {{ $property->full_address }} — {{ __('open in Google Maps') }}
+                </a>
+            </div>
+        </div>
+
+        <div class="card mb-3">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title">{{ __('Property Details') }}</h3>
                 @can('update', $property)

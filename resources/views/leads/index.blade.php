@@ -200,6 +200,9 @@
                             ];
                         @endphp
                         <span class="badge {{ $sourceColors[$lead->lead_source] ?? 'bg-blue-lt' }}">{{ __(ucwords(str_replace('_', ' ', $lead->lead_source))) }}</span>
+                        @if($lead->broker)
+                            <div class="text-secondary small">{{ __('via :broker', ['broker' => $lead->broker->name]) }}</div>
+                        @endif
                     </td>
                     <td>
                         <select class="form-select form-select-sm status-select" data-lead-id="{{ $lead->id }}" aria-label="{{ __('Status for') }} {{ $lead->full_name }}" style="width: auto; min-width: 120px;">

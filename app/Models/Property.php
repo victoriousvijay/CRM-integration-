@@ -18,6 +18,7 @@ class Property extends Model
         'city',
         'state',
         'zip_code',
+        'map_url',
         'property_type',
         'bedrooms',
         'bathrooms',
@@ -145,6 +146,23 @@ class Property extends Model
     public function getFullAddressAttribute(): string
     {
         return "{$this->address}, {$this->city}, {$this->state} {$this->zip_code}";
+    }
+
+    /**
+     * A map link for this property.
+     *
+     * Uses the link an admin pasted when there is one — they may have dropped
+     * an exact pin the postal address doesn't resolve to — and otherwise falls
+     * back to a Google Maps search for the address, so the address is always
+     * tappable for brokers and agents.
+     */
+    public function getMapLinkAttribute(): string
+    {
+        if (filled($this->map_url)) {
+            return $this->map_url;
+        }
+
+        return 'https://www.google.com/maps/search/?api=1&query='.urlencode($this->full_address);
     }
 
     public function getAssignmentFeeAttribute(): ?float

@@ -9,8 +9,19 @@
 
 <div class="card">
     <div class="card-body">
-        <h2 class="mb-1">{{ $property->address }}</h2>
-        <p class="text-secondary">{{ $property->city }}, {{ $property->state }} {{ $property->zip_code }}</p>
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
+            <div>
+                <h2 class="mb-1">{{ $property->address }}</h2>
+                <p class="text-secondary mb-2">{{ $property->city }}, {{ $property->state }} {{ $property->zip_code }}</p>
+                <a href="{{ $property->map_link }}" target="_blank" rel="noopener noreferrer"
+                   class="btn btn-outline-primary btn-sm">
+                    {{ __('Open in Google Maps') }}
+                </a>
+            </div>
+            <a href="{{ route('broker.leads.create', ['property' => $property->id]) }}" class="btn btn-primary">
+                {{ __('Log an enquiry') }}
+            </a>
+        </div>
 
         @php $price = $property->list_price ?: $property->asking_price ?: $property->estimated_value; @endphp
         <div class="h1 mb-4">{{ $price ? number_format((float) $price) : __('Price on request') }}</div>

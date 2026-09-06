@@ -19,6 +19,17 @@
             </a>
         </h1>
 
+        <nav class="d-flex gap-1 ms-2">
+            <a href="{{ route('broker.index') }}"
+               class="btn btn-sm {{ request()->routeIs('broker.index') || request()->routeIs('broker.show') ? 'btn-primary' : 'btn-ghost-secondary' }}">
+                {{ __('Properties') }}
+            </a>
+            <a href="{{ route('broker.leads.index') }}"
+               class="btn btn-sm {{ request()->routeIs('broker.leads.*') ? 'btn-primary' : 'btn-ghost-secondary' }}">
+                {{ __('My Enquiries') }}
+            </a>
+        </nav>
+
         <div class="ms-auto d-flex align-items-center gap-3">
             <span class="text-secondary d-none d-sm-inline">{{ auth()->user()->name }}</span>
             <form method="POST" action="{{ route('logout') }}">

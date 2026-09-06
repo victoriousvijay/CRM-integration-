@@ -24,6 +24,7 @@ class PropertyRequest extends FormRequest
             'city' => 'required|string|max:255',
             'state' => 'required|string|max:2',
             'zip_code' => 'required|string|max:10',
+            'map_url' => 'nullable|url|max:2048',
             'property_type' => "required|in:{$propertyTypes}",
             'bedrooms' => 'nullable|integer|min:0',
             'bathrooms' => 'nullable|integer|min:0',

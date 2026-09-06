@@ -100,6 +100,7 @@ class BusinessModeService
         'direct_mail'          => 'Direct Mail',
         'website'              => 'Website',
         'referral'             => 'Referral',
+        'broker'               => 'Broker',
         'driving_for_dollars'  => 'Driving for Dollars',
         'ppc'                  => 'PPC / Paid Ads',
         'seo'                  => 'SEO / Organic',
@@ -114,6 +115,7 @@ class BusinessModeService
     public const REALESTATE_LEAD_SOURCES = [
         'website'      => 'Website',
         'referral'     => 'Referral',
+        'broker'       => 'Broker',
         'open_house'   => 'Open House',
         'sign_call'    => 'Sign Call',
         'ppc'          => 'PPC / Paid Ads',

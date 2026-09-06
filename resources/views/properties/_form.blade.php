@@ -33,6 +33,15 @@
                        value="{{ $val('zip_code') }}" required maxlength="10">
                 @error('zip_code')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
+            <div class="col-md-12">
+                <label class="form-label" for="map_url">{{ __('Map Link') }}</label>
+                <input type="url" id="map_url" name="map_url" class="form-control @error('map_url') is-invalid @enderror"
+                       value="{{ $val('map_url') }}" placeholder="https://maps.app.goo.gl/...">
+                <small class="form-hint">
+                    {{ __('Optional. Paste a Google Maps link so brokers and agents can tap the address and get directions. Left empty, the address is searched on Google Maps instead.') }}
+                </small>
+                @error('map_url')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            </div>
         </div>
     </div>
 </div>

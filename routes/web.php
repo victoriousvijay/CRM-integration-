@@ -43,7 +43,9 @@ use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\KnowledgeBaseController;
 use App\Http\Controllers\Api\WebFormController;
 use App\Http\Controllers\ApiCredentialController;
+use App\Http\Controllers\BrokerLeadController;
 use App\Http\Controllers\BrokerPortalController;
+use App\Http\Controllers\LeadPhotoController;
 use App\Http\Controllers\BuyerPortalController;
 use App\Http\Controllers\BuyerPortalSettingsController;
 use App\Http\Controllers\WebhookRecipeController;
@@ -168,7 +170,18 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
     Route::middleware('role:admin,broker')->prefix('broker')->name('broker.')->group(function () {
         Route::get('/', [BrokerPortalController::class, 'index'])->name('index');
         Route::get('/properties/{property}', [BrokerPortalController::class, 'show'])->name('show');
+
+        // Walk-in enquiries a broker logs; they land in the CRM's Leads.
+        Route::get('/leads', [BrokerLeadController::class, 'index'])->name('leads.index');
+        Route::get('/leads/create', [BrokerLeadController::class, 'create'])->name('leads.create');
+        Route::post('/leads', [BrokerLeadController::class, 'store'])->name('leads.store');
     });
+
+    // A lead's client photo. Outside the CRM-only role group because the
+    // broker who logged the enquiry sees it in their own portal.
+    Route::get('/leads/{lead}/photo', [LeadPhotoController::class, 'show'])
+        ->middleware('role:admin,agent,acquisition_agent,disposition_agent,listing_agent,buyers_agent,broker')
+        ->name('leads.photo');
     Route::post('/dashboard/widgets', [DashboardController::class, 'updateWidgets'])->name('dashboard.updateWidgets');
     // Dashboard data API (field scouts have no charts, so exclude them)
     Route::get('/api/dashboard-data', [ReportController::class, 'dashboardData'])

@@ -14,6 +14,8 @@ class Lead extends Model
     protected $fillable = [
         'tenant_id',
         'agent_id',
+        'broker_id',
+        'visited_property_id',
         'first_name',
         'last_name',
         'phone',
@@ -101,6 +103,32 @@ class Lead extends Model
     public function agent()
     {
         return $this->belongsTo(User::class, 'agent_id');
+    }
+
+    /**
+     * The broker who brought this enquiry in, when it came through the
+     * broker portal rather than the CRM.
+     */
+    public function broker()
+    {
+        return $this->belongsTo(User::class, 'broker_id');
+    }
+
+    /**
+     * The property the client was actually shown.
+     */
+    public function visitedProperty()
+    {
+        return $this->belongsTo(Property::class, 'visited_property_id');
+    }
+
+    /**
+     * A photo of the client themselves, taken when a broker logged the
+     * enquiry. Distinct from photos(), which holds photos of their property.
+     */
+    public function clientPhoto()
+    {
+        return $this->hasOne(LeadClientPhoto::class);
     }
 
     public function tenant()

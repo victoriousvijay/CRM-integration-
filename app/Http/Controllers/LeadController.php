@@ -25,7 +25,7 @@ class LeadController extends Controller
     {
         $this->authorize('viewAny', Lead::class);
 
-        $query = Lead::with('agent')->withCount('lists');
+        $query = Lead::with(['agent', 'broker'])->withCount('lists');
 
         if (auth()->user()->isAgent()) {
             $query->where('agent_id', auth()->id());
@@ -209,7 +209,7 @@ class LeadController extends Controller
     public function show(Lead $lead)
     {
         $this->authorize('view', $lead);
-        $lead->load(['agent', 'property', 'activities', 'tasks', 'deals', 'lists', 'photos.uploader', 'sequenceEnrollments.sequence.steps']);
+        $lead->load(['agent', 'broker', 'visitedProperty', 'clientPhoto', 'property', 'activities', 'tasks', 'deals', 'lists', 'photos.uploader', 'sequenceEnrollments.sequence.steps']);
         $sequences = \App\Models\Sequence::where('is_active', true)->get();
         $assignmentHistory = app(AssignmentHistoryService::class)->getHistory($lead);
         return view('leads.show', compact('lead', 'sequences', 'assignmentHistory'));

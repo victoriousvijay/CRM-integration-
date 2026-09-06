@@ -41,6 +41,45 @@
         </div>
         @endif
 
+        @if($lead->broker_id)
+        {{-- Enquiries logged by a broker in their portal carry context the CRM
+             forms never collect: who brought the client in, what they were
+             shown, and a photo taken at the time. --}}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h3 class="card-title">{{ __('Broker Enquiry') }}</h3>
+            </div>
+            <div class="card-body">
+                <div class="d-flex gap-3 align-items-start">
+                    @if($lead->clientPhoto)
+                        <img src="{{ $lead->clientPhoto->url() }}" alt="{{ $lead->first_name }}"
+                             class="rounded" style="height:96px;width:96px;object-fit:cover;">
+                    @endif
+                    <div class="datagrid flex-grow-1">
+                        <div class="datagrid-item">
+                            <div class="datagrid-title">{{ __('Brought in by') }}</div>
+                            <div class="datagrid-content">{{ $lead->broker?->name ?? __('Broker removed') }}</div>
+                        </div>
+                        <div class="datagrid-item">
+                            <div class="datagrid-title">{{ __('Property visited') }}</div>
+                            <div class="datagrid-content">
+                                @if($lead->visitedProperty)
+                                    <a href="{{ route('properties.show', $lead->visitedProperty) }}">{{ $lead->visitedProperty->full_address }}</a>
+                                @else
+                                    <span class="text-secondary">{{ __('No specific property') }}</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="datagrid-item">
+                            <div class="datagrid-title">{{ __('Logged at') }}</div>
+                            <div class="datagrid-content">{{ $lead->created_at?->format('d M Y, g:i A') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Lead Info Card -->
         <div class="card mb-3">
             <div class="card-header">
