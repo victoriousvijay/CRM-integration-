@@ -54,8 +54,6 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->report(function (\Throwable $e) {
-            error_log('APP_EXCEPTION_REPORT: '.get_class($e).': '.$e->getMessage().' at '.$e->getFile().':'.$e->getLine());
-
             try {
                 if (!app()->bound('db') || !Illuminate\Support\Facades\Schema::hasTable('error_logs')) {
                     return;
