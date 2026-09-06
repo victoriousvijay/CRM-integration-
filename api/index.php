@@ -19,9 +19,13 @@ $_SERVER['SCRIPT_NAME'] = '/index.php';
 if (($_GET['vercel_diag'] ?? null) === 'db') {
     // One-off diagnostic: report whether the database is reachable, and with
     // what error if not. Never prints credentials — host/port/database only.
+    header('Content-Type: application/json');
+    $out = [];
+
+    try {
     require dirname(__DIR__).'/vendor/autoload.php';
     $app = require dirname(__DIR__).'/bootstrap/app.php';
-    $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
+    $app->make(\Illuminate\Contracts\Http\Kernel::class)->bootstrap();
 
     $cfg = config('database.connections.'.config('database.default'));
     $out = [
@@ -44,8 +48,10 @@ if (($_GET['vercel_diag'] ?? null) === 'db') {
         $out['connected'] = false;
         $out['error'] = $e->getMessage();
     }
+    } catch (\Throwable $outer) {
+        $out['probe_failed'] = get_class($outer).': '.$outer->getMessage().' at '.$outer->getFile().':'.$outer->getLine();
+    }
 
-    header('Content-Type: application/json');
     echo json_encode($out, JSON_PRETTY_PRINT);
     exit;
 }
