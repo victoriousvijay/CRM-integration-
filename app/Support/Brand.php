@@ -68,4 +68,22 @@ class Brand
 
         return filled($logoPath) ? asset('storage/'.$logoPath) : null;
     }
+
+    /**
+     * The platform's own logo — used where the product speaks as itself
+     * (the sign-in screen, the "powered by" footer), never as a stand-in
+     * for a tenant's brand.
+     */
+    public static function platformLogo(): string
+    {
+        return asset('images/platform-logo.png');
+    }
+
+    /**
+     * The logo mark alone, for placements too small for the wordmark to read.
+     */
+    public static function platformMark(): string
+    {
+        return asset('images/platform-mark.png');
+    }
 }

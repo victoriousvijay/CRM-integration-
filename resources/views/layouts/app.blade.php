@@ -67,7 +67,7 @@
 
     // Recently viewed — defined in <head> so it's available to all page scripts
     window.trackRecentlyViewed = function(type, id, name, url) {
-        var KEY = 'insulacrm_recently_viewed';
+        var KEY = 'crm_recently_viewed';
         var items = [];
         try { items = JSON.parse(localStorage.getItem(KEY)) || []; } catch(e) {}
         items = items.filter(function(i) { return !(i.type === type && i.id === id); });
@@ -419,6 +419,8 @@
                     <script>document.addEventListener('DOMContentLoaded',function(){window.showToast(@json(session('error')),'error')})</script>
                     @endif
                     @yield('content')
+
+                    @include('layouts._platform-footer')
                 </div>
             </div>
         </main>
@@ -427,7 +429,7 @@
     <script>
     // Populate recently viewed dropdown (and register refresh for live updates)
     window._refreshRecentlyViewed = function() {
-        var KEY = 'insulacrm_recently_viewed';
+        var KEY = 'crm_recently_viewed';
         var listEl = document.getElementById('recently-viewed-list');
         if (!listEl) return;
         var items = [];

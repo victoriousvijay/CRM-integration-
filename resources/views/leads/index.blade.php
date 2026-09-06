@@ -368,7 +368,7 @@ document.querySelectorAll('.status-select').forEach(function(select) {
 
 // Saved views (localStorage)
 (function() {
-    var STORAGE_KEY = 'insulacrm_saved_views_leads';
+    var STORAGE_KEY = 'valtcrm_saved_views_leads';
     var list = document.getElementById('saved-views-list');
     var saveBtn = document.getElementById('save-view-btn');
     var bar = document.getElementById('saved-views-bar');
@@ -422,7 +422,7 @@ document.querySelectorAll('.status-select').forEach(function(select) {
 
 // Table density toggle
 (function() {
-    var STORAGE_KEY = 'insulacrm_table_density';
+    var STORAGE_KEY = 'valtcrm_table_density';
     var table = document.querySelector('.table.card-table');
     if (!table) return;
 

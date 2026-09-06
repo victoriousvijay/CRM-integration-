@@ -35,5 +35,6 @@
             </div>
         </div>
     </div>
+@include('layouts._platform-footer')
 </body>
 </html>

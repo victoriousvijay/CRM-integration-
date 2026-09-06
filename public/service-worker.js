@@ -12,8 +12,8 @@
  */
 
 var CACHE_VERSION = 'v1.0.0';
-var STATIC_CACHE = 'insulacrm-static-' + CACHE_VERSION;
-var DYNAMIC_CACHE = 'insulacrm-dynamic-' + CACHE_VERSION;
+var STATIC_CACHE = 'valtcrm-static-' + CACHE_VERSION;
+var DYNAMIC_CACHE = 'valtcrm-dynamic-' + CACHE_VERSION;
 
 // Derive base path from service worker location (supports subdirectory installs)
 var BASE_PATH = self.location.pathname.replace(/\/service-worker\.js$/, '') + '/';
@@ -70,7 +70,7 @@ self.addEventListener('activate', function(event) {
         caches.keys().then(function(cacheNames) {
             return Promise.all(
                 cacheNames.filter(function(name) {
-                    return name.startsWith('insulacrm-') && name !== STATIC_CACHE && name !== DYNAMIC_CACHE;
+                    return name.startsWith('valtcrm-') && name !== STATIC_CACHE && name !== DYNAMIC_CACHE;
                 }).map(function(name) {
                     return caches.delete(name);
                 })

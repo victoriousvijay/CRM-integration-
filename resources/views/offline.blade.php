@@ -121,5 +121,6 @@
     </div>
 
     <div class="footer-text">{{ \App\Support\Brand::name() }} - {{ config('platform.tagline') }}</div>
+@include('layouts._platform-footer')
 </body>
 </html>

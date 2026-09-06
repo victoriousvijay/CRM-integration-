@@ -48,6 +48,8 @@
             @endif
 
             @yield('content')
+
+            @include('layouts._platform-footer')
         </div>
     </div>
 </div>

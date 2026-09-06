@@ -111,5 +111,6 @@
     <div class="bp-footer">
         <p class="mb-0">&copy; {{ date('Y') }} {{ $tenant->name }}. {{ __('All rights reserved.') }}</p>
     </div>
+@include('layouts._platform-footer')
 </body>
 </html>

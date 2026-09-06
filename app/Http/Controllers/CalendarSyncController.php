@@ -80,7 +80,7 @@ class CalendarSyncController extends Controller
 
         return response($ical, 200, [
             'Content-Type' => 'text/calendar; charset=utf-8',
-            'Content-Disposition' => 'inline; filename="insulacrm-calendar.ics"',
+            'Content-Disposition' => 'inline; filename="calendar.ics"',
         ]);
     }
 
@@ -215,7 +215,7 @@ class CalendarSyncController extends Controller
 
         foreach ($tasks as $task) {
             $lines[] = 'BEGIN:VEVENT';
-            $lines[] = 'UID:task-' . $task->id . '@insulacrm';
+            $lines[] = 'UID:task-' . $task->id . '@crm';
             $lines[] = 'DTSTART;VALUE=DATE:' . $task->due_date->format('Ymd');
             $lines[] = 'SUMMARY:' . $this->escapeIcalText('Task: ' . $task->title);
 
@@ -232,7 +232,7 @@ class CalendarSyncController extends Controller
 
         foreach ($activities as $activity) {
             $lines[] = 'BEGIN:VEVENT';
-            $lines[] = 'UID:activity-' . $activity->id . '@insulacrm';
+            $lines[] = 'UID:activity-' . $activity->id . '@crm';
             $lines[] = 'DTSTART;VALUE=DATE:' . $activity->logged_at->format('Ymd');
             $summary = ucfirst($activity->type) . ($activity->subject ? ': ' . $activity->subject : '');
             $lines[] = 'SUMMARY:' . $this->escapeIcalText($summary);

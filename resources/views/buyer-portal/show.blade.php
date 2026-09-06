@@ -455,5 +455,6 @@
         });
     });
     </script>
+@include('layouts._platform-footer')
 </body>
 </html>

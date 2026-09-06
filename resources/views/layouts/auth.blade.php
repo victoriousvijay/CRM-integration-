@@ -15,10 +15,13 @@
         <div class="container container-tight py-4">
             <div class="text-center mb-4">
                 <a href="{{ url('/') }}" class="text-decoration-none">
-                    @include('layouts._brand', ['size' => '2rem'])
+                    <img src="{{ \App\Support\Brand::platformLogo() }}" alt="{{ \App\Support\Brand::platformName() }}"
+                         style="max-height:150px;max-width:260px;">
                 </a>
             </div>
             @yield('content')
+
+            @include('layouts._platform-footer')
         </div>
     </main>
     @stack('scripts')

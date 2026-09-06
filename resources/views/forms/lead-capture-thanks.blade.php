@@ -23,7 +23,7 @@
                 @endif
             </div>
         </div>
-        <p class="text-center text-secondary mt-3" style="font-size: 0.75rem;">{{ __('Powered by') }} {{ \App\Support\Brand::name() }}</p>
     </div>
+@include('layouts._platform-footer')
 </body>
 </html>
