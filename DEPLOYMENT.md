@@ -21,10 +21,13 @@ adapted rather than faked:
 | File storage (logos, documents, imports) | local disk | **S3** (or Supabase Storage, which is S3-compatible) — `FILESYSTEM_DISK=s3` |
 
 **Trade-off to be explicit about:** Vercel Cron on the free/Hobby plan only
-fires once a day; the Pro plan supports per-minute schedules. If your queue
-needs near-real-time processing (e.g. instant lead-assignment
-notifications) and you're on Hobby, either upgrade to Pro or run the queue
-elsewhere — see the alternative below.
+allows daily schedules — `vercel.json` ships with `"0 7 * * *"` (once a
+day) for exactly this reason; deploying with a more frequent expression on
+Hobby fails at deploy time with `cron_jobs_limits_reached`. The Pro plan
+supports per-minute schedules — if your queue needs near-real-time
+processing (e.g. instant lead-assignment notifications), either upgrade to
+Pro and tighten `vercel.json`'s cron schedule, or run the queue elsewhere —
+see the alternative below.
 
 **If you need true background workers or sub-minute reliability**, the
 more robust option is a small always-on container (Fly.io, Railway, a $5
