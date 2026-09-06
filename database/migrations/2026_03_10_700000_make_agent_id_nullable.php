@@ -16,6 +16,12 @@ return new class extends Migration
             return;
         }
 
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE leads ALTER COLUMN agent_id DROP NOT NULL');
+            DB::statement('ALTER TABLE deals ALTER COLUMN agent_id DROP NOT NULL');
+            return;
+        }
+
         // Make agent_id nullable on leads (API-ingested leads have no agent yet)
         DB::statement('ALTER TABLE leads MODIFY COLUMN agent_id BIGINT UNSIGNED NULL');
 
@@ -26,6 +32,12 @@ return new class extends Migration
     public function down(): void
     {
         if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
+        if (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE leads ALTER COLUMN agent_id SET NOT NULL');
+            DB::statement('ALTER TABLE deals ALTER COLUMN agent_id SET NOT NULL');
             return;
         }
 

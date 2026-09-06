@@ -16,12 +16,27 @@ return new class extends Migration
             $table->string('timezone', 50)->nullable()->after('do_not_contact');
         });
 
-        if (DB::getDriverName() !== 'sqlite') {
+        if (DB::getDriverName() === 'mysql' || DB::getDriverName() === 'mariadb') {
             // Expand lead_source enum to include list_import
             DB::statement("ALTER TABLE leads MODIFY COLUMN lead_source ENUM('cold_call','direct_mail','website','referral','driving_for_dollars','list_import','other') DEFAULT 'other'");
 
             // Expand status enum to full pipeline
             DB::statement("ALTER TABLE leads MODIFY COLUMN status ENUM('new','prospecting','contacting','engaging','contacted','negotiating','offer_presented','under_contract','dispositions','assigned','closing','closed','closed_won','closed_lost','dead') DEFAULT 'new'");
+        } elseif (DB::getDriverName() === 'pgsql') {
+            // Postgres has no inline ENUM-alter syntax; Laravel's original
+            // $table->enum() on pgsql is a varchar column plus a CHECK
+            // constraint restricting it to the original value list — that
+            // constraint must be dropped too, or it keeps rejecting the
+            // newly-added values below (a later migration removes these
+            // columns' restriction entirely, so there's no need to recreate
+            // an expanded CHECK here — same end state as MySQL's plain
+            // VARCHAR conversion further down the line).
+            DB::statement('ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_lead_source_check');
+            DB::statement("ALTER TABLE leads ALTER COLUMN lead_source TYPE VARCHAR(50)");
+            DB::statement("ALTER TABLE leads ALTER COLUMN lead_source SET DEFAULT 'other'");
+            DB::statement('ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_status_check');
+            DB::statement("ALTER TABLE leads ALTER COLUMN status TYPE VARCHAR(50)");
+            DB::statement("ALTER TABLE leads ALTER COLUMN status SET DEFAULT 'new'");
         }
 
         // ─── Upgrade properties table ───
@@ -35,8 +50,12 @@ return new class extends Migration
         });
 
         // ─── Upgrade activities table ───
-        if (DB::getDriverName() !== 'sqlite') {
+        if (DB::getDriverName() === 'mysql' || DB::getDriverName() === 'mariadb') {
             DB::statement("ALTER TABLE activities MODIFY COLUMN type ENUM('call','sms','email','note','meeting','voicemail','direct_mail','stage_change') DEFAULT 'note'");
+        } elseif (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE activities DROP CONSTRAINT IF EXISTS activities_type_check');
+            DB::statement("ALTER TABLE activities ALTER COLUMN type TYPE VARCHAR(50)");
+            DB::statement("ALTER TABLE activities ALTER COLUMN type SET DEFAULT 'note'");
         }
 
         // ─── Upgrade deals table ───
@@ -47,8 +66,12 @@ return new class extends Migration
         });
 
         // Expand deal stage enum to full pipeline
-        if (DB::getDriverName() !== 'sqlite') {
+        if (DB::getDriverName() === 'mysql' || DB::getDriverName() === 'mariadb') {
             DB::statement("ALTER TABLE deals MODIFY COLUMN stage ENUM('new_lead','prospecting','contacting','engaging','contacted','offer_made','offer_presented','negotiating','under_contract','dispositions','assigned','closing','closed_won','closed_lost') DEFAULT 'new_lead'");
+        } elseif (DB::getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE deals DROP CONSTRAINT IF EXISTS deals_stage_check');
+            DB::statement("ALTER TABLE deals ALTER COLUMN stage TYPE VARCHAR(50)");
+            DB::statement("ALTER TABLE deals ALTER COLUMN stage SET DEFAULT 'new_lead'");
         }
 
         // ─── Upgrade tenants table ───

@@ -10,11 +10,28 @@ return new class extends Migration
     public function up(): void
     {
         // Convert ENUM columns to VARCHAR so pipeline stages can be tenant-configurable.
-        if (DB::getDriverName() === 'mysql') {
+        if (DB::getDriverName() === 'mysql' || DB::getDriverName() === 'mariadb') {
             DB::statement("ALTER TABLE deals MODIFY COLUMN stage VARCHAR(50) NOT NULL DEFAULT 'prospecting'");
             DB::statement("ALTER TABLE leads MODIFY COLUMN status VARCHAR(50) NOT NULL DEFAULT 'new'");
             DB::statement("ALTER TABLE properties MODIFY COLUMN property_type VARCHAR(50) NOT NULL DEFAULT 'single_family'");
             DB::statement("ALTER TABLE properties MODIFY COLUMN `condition` VARCHAR(50) NULL");
+        } elseif (DB::getDriverName() === 'pgsql') {
+            // Drop any leftover CHECK constraint from the original $table->enum()
+            // definitions (each named "{table}_{column}_check" by Postgres) —
+            // this is the final step that actually lifts the restriction, so
+            // these values can be tenant-configurable from here on.
+            DB::statement('ALTER TABLE deals DROP CONSTRAINT IF EXISTS deals_stage_check');
+            DB::statement("ALTER TABLE deals ALTER COLUMN stage TYPE VARCHAR(50)");
+            DB::statement("ALTER TABLE deals ALTER COLUMN stage SET DEFAULT 'prospecting'");
+            DB::statement('ALTER TABLE leads DROP CONSTRAINT IF EXISTS leads_status_check');
+            DB::statement("ALTER TABLE leads ALTER COLUMN status TYPE VARCHAR(50)");
+            DB::statement("ALTER TABLE leads ALTER COLUMN status SET DEFAULT 'new'");
+            DB::statement('ALTER TABLE properties DROP CONSTRAINT IF EXISTS properties_property_type_check');
+            DB::statement("ALTER TABLE properties ALTER COLUMN property_type TYPE VARCHAR(50)");
+            DB::statement("ALTER TABLE properties ALTER COLUMN property_type SET DEFAULT 'single_family'");
+            DB::statement('ALTER TABLE properties DROP CONSTRAINT IF EXISTS properties_condition_check');
+            DB::statement('ALTER TABLE properties ALTER COLUMN "condition" TYPE VARCHAR(50)');
+            DB::statement('ALTER TABLE properties ALTER COLUMN "condition" DROP NOT NULL');
         } elseif (DB::getDriverName() === 'sqlite') {
             // SQLite ENUM creates CHECK constraints that block new values.
             // Use Laravel's change() which recreates the table without the CHECK.
@@ -53,6 +70,11 @@ return new class extends Migration
     {
         if (DB::getDriverName() === 'sqlite') {
             $indexes = DB::select("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name=? AND name=?", [$table, $indexName]);
+            return count($indexes) > 0;
+        }
+
+        if (DB::getDriverName() === 'pgsql') {
+            $indexes = DB::select('SELECT indexname FROM pg_indexes WHERE tablename = ? AND indexname = ?', [$table, $indexName]);
             return count($indexes) > 0;
         }
 
