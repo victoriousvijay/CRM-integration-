@@ -58,6 +58,27 @@ documentation. It does not re-implement what already worked.
 - **Phase 15 (tests)** — `tests/Feature/Api/ApiCredentialTest.php` (full
   vs. embed scoping, revocation, honeypot) plus two new cases in
   `TenantIsolationTest.php` for credential-based cross-tenant isolation.
+  All 407 tests, including these, were run against a real local
+  **PostgreSQL 16** instance (not just SQLite) — see the Postgres
+  validation note below.
+
+### Postgres validation (beyond static audit)
+
+Running the migrations against a real Postgres instance (installed
+locally for this) surfaced bugs a code-only audit missed: five migrations
+used raw MySQL-only `MODIFY COLUMN` statements guarded by `!== 'sqlite'`,
+so they silently ran the MySQL branch on Postgres and failed outright.
+Beyond that, even after fixing the syntax, the tenant-configurable
+lead-status/deal-stage columns still rejected new values — Laravel's
+`$table->enum()` compiles to a CHECK constraint on Postgres (not a native
+enum), and widening a column's type doesn't drop that constraint the way
+MySQL's `MODIFY COLUMN` does, so a leftover `leads_status_check`/
+`deals_stage_check` kept enforcing the original hard-coded value list.
+Fixed in a follow-up commit; validated by running all 528 migration
+statements end-to-end and the full 407-test suite against that Postgres
+instance (all passing). This is a good example of why "audited for X" and
+"ran against a real X" are different claims — the former missed both
+issues above.
 - **Phase 16/17 (Vercel deploy)** — `vercel.json` + `api/index.php` using
   the community `vercel-php` runtime; session/cache/queue moved to
   database-backed drivers (no local filesystem persistence on Vercel);
@@ -92,7 +113,18 @@ documentation. It does not re-implement what already worked.
   endpoint, file-upload content-type validation) was not performed as a
   separate exercise in this pass.
 - **Vercel deployment has not been live-tested** against a real Supabase
-  project in this pass (no deploy credentials available in this
+  project in this pass (no Vercel deploy credentials available in this
   environment) — `vercel.json`/`api/index.php` follow the documented
   `vercel-php` pattern but should be verified against a staging deploy
-  before pointing a real client's domain at it.
+  before pointing a real client's domain at it. The database schema and
+  application logic side is now validated against real Postgres (see
+  above); what's untested is specifically the Vercel serverless runtime
+  itself (`vercel-php`, the Cron-triggered scheduler/queue endpoint) and
+  the actual Supabase project's network path (SSL, connection pooling).
+- **Migration not yet run against the actual Supabase project** — the
+  schema was validated against a local PostgreSQL 16 instance (see above),
+  not the Supabase Postgres 17 project itself, since that requires the
+  project's database password, which — deliberately — was never requested
+  in this chat. Run `php artisan migrate --force` with `DB_URL` set as a
+  real environment variable (your machine/CI/Vercel) to apply it there;
+  see `DEPLOYMENT.md` step 3.
