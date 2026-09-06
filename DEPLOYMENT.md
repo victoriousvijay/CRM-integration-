@@ -19,6 +19,8 @@ adapted rather than faked:
 | Queue | `artisan queue:work` daemon | **database** queue, drained by the cron endpoint below (`QUEUE_CONNECTION=database`) |
 | Scheduler | `artisan schedule:work` / cron | Vercel Cron hits `GET /internal/cron/schedule` (see `vercel.json` `crons`), which runs due schedule events and `queue:work --stop-when-empty` for one pass |
 | File storage (logos, documents, imports) | local disk | **S3** (or Supabase Storage, which is S3-compatible) — `FILESYSTEM_DISK=s3` |
+| Logs | `storage/logs/laravel.log` | **stderr** (`LOG_CHANNEL=stderr`) — shows up in Vercel's runtime logs |
+| Laravel's own scratch files (compiled views, framework locks) | `storage/framework/*` | redirected to a per-invocation `/tmp` directory automatically — see `public/index.php`'s `insulaPrepareServerlessStoragePath()` and `bootstrap/app.php`'s `useStoragePath()` call; nothing to configure |
 
 **Trade-off to be explicit about:** Vercel Cron on the free/Hobby plan only
 allows daily schedules — `vercel.json` ships with `"0 7 * * *"` (once a
@@ -48,7 +50,7 @@ Document this clearly to the client if their lead volume grows.
    - `DB_CONNECTION=pgsql`, `DB_URL` (or `DB_HOST`/`DB_PORT`/`DB_DATABASE`/
      `DB_USERNAME`/`DB_PASSWORD`), `DB_SSLMODE=require`
    - `SESSION_DRIVER=database`, `CACHE_STORE=database`,
-     `QUEUE_CONNECTION=database`
+     `QUEUE_CONNECTION=database`, `LOG_CHANNEL=stderr`
    - `FILESYSTEM_DISK=s3` + `AWS_*` (or Supabase Storage's S3-compatible
      credentials)
    - `MAIL_*` for your transactional email provider

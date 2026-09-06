@@ -6,7 +6,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 
-return Application::configure(basePath: dirname(__DIR__))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
@@ -87,3 +87,14 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
     })->create();
+
+// On a read-only-filesystem host (Vercel), public/index.php redirects
+// storage to a per-invocation /tmp directory and exposes it here — see
+// insulaPrepareServerlessStoragePath() there. Sessions/cache/queue are
+// database-backed in that deployment, so this only needs to hold
+// Laravel's own scratch files (compiled views, framework locks).
+if ($storagePath = env('LARAVEL_STORAGE_PATH')) {
+    $app->useStoragePath($storagePath);
+}
+
+return $app;
