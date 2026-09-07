@@ -384,7 +384,7 @@
                                     <li class="mb-2">
                                         <strong>{{ __('Configure message:') }}</strong> {{ __('Select the channel and build your message template:') }}
                                         <div class="bg-light p-2 rounded mt-1">
-                                            <code>Deal "{{'{{'}}data.title{{'}}'}}" moved to {{'{{'}}data.new_stage{{'}}'}} (was {{'{{'}}data.old_stage{{'}}'}}). Contract price: ${{'{{'}}data.contract_price{{'}}'}}</code>
+                                            <code>Deal "@{{data.title}}" moved to @{{data.new_stage}} (was @{{data.old_stage}}). Contract price: $@{{data.contract_price}}</code>
                                         </div>
                                     </li>
                                     <li>
@@ -457,8 +457,8 @@
                                     <li class="mb-2">
                                         <strong>{{ __('Configure:') }}</strong>
                                         <ul class="mt-1">
-                                            <li>{{ __('Summary:') }} <code>{{ __('Closing:') }} {{'{{'}}data.title{{'}}'}}</code></li>
-                                            <li>{{ __('Description:') }} <code>{{ __('Contract Price: $') }}{{'{{'}}data.contract_price{{'}}'}}</code></li>
+                                            <li>{{ __('Summary:') }} <code>{{ __('Closing:') }} @{{data.title}}</code></li>
+                                            <li>{{ __('Description:') }} <code>{{ __('Contract Price: $') }}@{{data.contract_price}}</code></li>
                                             <li>{{ __('Start Date/Time: Use the closing_date from the payload if available') }}</li>
                                         </ul>
                                     </li>

@@ -290,11 +290,11 @@
                             <div class="mb-3">
                                 <label class="form-label">{{ __('To (email)') }}</label>
                                 <input type="text" class="form-control" data-config="to" placeholder="{{ __('Leave blank to use model email') }}">
-                                <small class="text-muted">{{ __('Supports merge fields: {{email}}') }}</small>
+                                <small class="text-muted">{{ __('Supports merge fields:') }} <code>@{{email}}</code></small>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label required">{{ __('Subject') }}</label>
-                                <input type="text" class="form-control" data-config="subject" placeholder="{{ __('e.g., Follow-up on your property at {{property.address}}') }}">
+                                <input type="text" class="form-control" data-config="subject" placeholder="{{ __('e.g., Follow-up on your property at') }} @{{property.address}}">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label required">{{ __('Body') }}</label>
@@ -318,7 +318,7 @@
                         <div class="action-field-group" data-action="create_task" style="display:none;">
                             <div class="mb-3">
                                 <label class="form-label required">{{ __('Task Title') }}</label>
-                                <input type="text" class="form-control" data-config="title" placeholder="{{ __('e.g., Follow up with {{first_name}}') }}">
+                                <input type="text" class="form-control" data-config="title" placeholder="{{ __('e.g., Follow up with') }} @{{first_name}}">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">{{ __('Description') }}</label>
@@ -379,7 +379,7 @@
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">{{ __('Notification Message') }}</label>
-                                <textarea class="form-control" data-config="message" rows="2" placeholder="{{ __('e.g., New hot lead: {{first_name}} {{last_name}}') }}"></textarea>
+                                <textarea class="form-control" data-config="message" rows="2" placeholder="{{ __('e.g., New hot lead:') }} @{{first_name}} @{{last_name}}"></textarea>
                             </div>
                         </div>
 
