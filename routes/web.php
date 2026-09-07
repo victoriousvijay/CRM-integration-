@@ -113,13 +113,22 @@ Route::get('/manifest.json', function () {
         'start_url' => url('/dashboard'),
         'scope' => url('/').'/',
         'display' => 'standalone',
-        'background_color' => '#ffffff',
+        // Android paints the launch screen with background_color behind the
+        // icon; white behind a logo on a black tile shows as a hard square.
+        'background_color' => '#000000',
         'theme_color' => '#0054a6',
         'orientation' => 'any',
         'categories' => ['business', 'productivity'],
+        // Two purposes, two files, deliberately. A launcher crops a `maskable`
+        // icon to whatever shape it likes — a circle inscribed in the middle
+        // 80% at worst — so the same edge-to-edge artwork that looks right as
+        // `any` loses the ends of the wordmark. The maskable files carry the
+        // padding that survives the crop.
         'icons' => [
-            ['src' => asset('img/icon-192.png'), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any maskable'],
-            ['src' => asset('img/icon-512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any maskable'],
+            ['src' => asset('img/icon-192.png'), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'any'],
+            ['src' => asset('img/icon-512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'any'],
+            ['src' => asset('img/icon-maskable-192.png'), 'sizes' => '192x192', 'type' => 'image/png', 'purpose' => 'maskable'],
+            ['src' => asset('img/icon-maskable-512.png'), 'sizes' => '512x512', 'type' => 'image/png', 'purpose' => 'maskable'],
         ],
     ])->header('Content-Type', 'application/manifest+json');
 })->name('pwa.manifest');

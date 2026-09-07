@@ -10,6 +10,7 @@
     @stack('styles')
 </head>
 <body class="d-flex flex-column">
+@include('layouts._splash')
     <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js" defer></script>
     <main class="page page-center">
         <div class="container container-tight py-4">

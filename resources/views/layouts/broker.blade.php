@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
 </head>
 <body class="d-flex flex-column">
+@include('layouts._splash')
 <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js" defer></script>
 
 <header class="navbar navbar-expand-md navbar-light d-print-none border-bottom bg-white">

@@ -80,6 +80,7 @@
     </script>
 </head>
 <body class="layout-fluid" data-bs-theme="{{ auth()->check() && auth()->user()->theme === 'dark' ? 'dark' : 'light' }}">
+@include('layouts._splash')
     <a href="#main-content" class="visually-hidden-focusable">{{ __('Skip to main content') }}</a>
     @if(session('impersonating'))
     <div class="alert alert-warning text-center mb-0 rounded-0">
