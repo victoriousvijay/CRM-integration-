@@ -12,6 +12,9 @@
     @if(session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+    @if(session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
 
     <div class="card">
         <div class="table-responsive">
@@ -29,12 +32,17 @@
                 </thead>
                 <tbody>
                     @forelse($tenants as $tenant)
+                        @php $isOwn = $tenant->id === auth()->user()->tenant_id; @endphp
                         <tr>
                             <td>
-                                @if($tenant->logo_path)
-                                    <img src="{{ asset('storage/'.$tenant->logo_path) }}" style="height:20px;margin-right:8px;">
+                                @if(\App\Support\Brand::logoFor($tenant))
+                                    <img src="{{ \App\Support\Brand::logoFor($tenant) }}" alt="" style="height:20px;margin-right:8px;">
                                 @endif
                                 {{ $tenant->name }}
+                                {{-- Your own account sits in this list too; it is not a client. --}}
+                                @if($isOwn)
+                                    <span class="badge bg-blue-lt ms-1">Your platform account</span>
+                                @endif
                             </td>
                             <td><code>{{ $tenant->slug }}</code></td>
                             <td>{{ $tenant->users_count }}</td>

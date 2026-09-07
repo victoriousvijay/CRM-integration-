@@ -208,8 +208,16 @@ class TenantController extends Controller
         return redirect()->route('platform-admin.tenants.index');
     }
 
-    public function suspend(Tenant $tenant)
+    public function suspend(Request $request, Tenant $tenant)
     {
+        // Suspending your own tenant locks you out of the product on the very
+        // next click — TenantMiddleware signs out any user whose tenant is not
+        // active — and there is no screen left to undo it from. Only a hand at
+        // the database gets you back, so refuse instead.
+        if ($tenant->id === $request->user()->tenant_id) {
+            return back()->with('error', 'You cannot suspend the tenant your own account belongs to — it would sign you out with no way back in.');
+        }
+
         $tenant->update(['status' => 'suspended']);
         AuditLog::log('platform.tenant_suspended', $tenant);
 

@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -44,6 +45,22 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::defaultView('vendor.pagination.tabler');
         Paginator::defaultSimpleView('vendor.pagination.tabler');
+
+        // The app layout labels half its navigation by business mode, and
+        // TenantMiddleware shares it — but the platform-admin console runs
+        // outside that middleware on purpose, so those pages rendered the whole
+        // sidebar in wholesale terms whatever the signed-in user's tenant said.
+        // Filled in here for any view the middleware did not already reach.
+        View::composer('layouts.app', function ($view) {
+            if (array_key_exists('businessMode', $view->getData())) {
+                return;
+            }
+
+            $tenant = auth()->user()?->tenant;
+
+            $view->with('businessMode', $tenant?->business_mode ?? 'wholesale');
+            $view->with('modeTerms', \App\Services\BusinessModeService::getTerminology($tenant));
+        });
 
         Gate::policy(Lead::class, LeadPolicy::class);
         Gate::policy(Deal::class, DealPolicy::class);

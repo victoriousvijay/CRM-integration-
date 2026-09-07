@@ -239,6 +239,26 @@ class PlatformAdminConsoleTest extends TestCase
         $this->assertNull(session('platform_impersonating'));
     }
 
+    public function test_the_platform_owner_cannot_suspend_their_own_tenant(): void
+    {
+        // TenantMiddleware signs out any user whose tenant is not active, so
+        // this would log the owner out on their next click with no screen left
+        // to undo it from — only a hand at the database gets them back.
+        $own = $this->platformAdmin->tenant;
+
+        $this->actingAs($this->platformAdmin)
+            ->post(route('platform-admin.tenants.suspend', $own))
+            ->assertRedirect();
+
+        $this->assertSame('active', $own->fresh()->status);
+
+        // A client's tenant still suspends normally.
+        $this->actingAs($this->platformAdmin)
+            ->post(route('platform-admin.tenants.suspend', $this->client));
+
+        $this->assertSame('suspended', $this->client->fresh()->status);
+    }
+
     public function test_a_tenant_admin_cannot_forge_the_way_into_a_platform_account(): void
     {
         // No session key means nobody handed them this trip.

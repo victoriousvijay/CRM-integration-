@@ -9,9 +9,13 @@
         <div class="d-flex gap-2">
             <a href="{{ route('platform-admin.tenants.edit', $tenant) }}" class="btn btn-outline-secondary">Branding &amp; Features</a>
 
+            @php $isOwn = $tenant->id === auth()->user()->tenant_id; @endphp
+
+            @unless($isOwn)
             <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#signInAsModal">
                 Sign in as this client
             </button>
+            @endunless
 
             <div class="modal fade" id="signInAsModal" tabindex="-1">
                 <div class="modal-dialog modal-dialog-centered">
@@ -37,7 +41,11 @@
                     </form>
                 </div>
             </div>
-            @if($tenant->status === 'active')
+            @if($isOwn)
+                {{-- Suspending your own tenant signs you out on the next click,
+                     with no screen left to undo it from. --}}
+                <span class="badge bg-blue-lt align-self-center">Your platform account</span>
+            @elseif($tenant->status === 'active')
                 <form method="POST" action="{{ route('platform-admin.tenants.suspend', $tenant) }}">@csrf
                     <button class="btn btn-outline-danger">Suspend</button>
                 </form>
