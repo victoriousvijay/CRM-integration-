@@ -143,6 +143,39 @@ php artisan tinker
   restore from a Supabase backup for anything destructive a migration
   `down()` can't cleanly undo.
 
+## Supabase: close the public REST API before going live
+
+**Do this on every new Supabase project.** Supabase publishes every table in
+the `public` schema through PostgREST, and grants the `anon` and
+`authenticated` roles full rights on anything created there — including tables
+created by Laravel migrations. The anon key that authenticates as `anon` is
+public by design: it is meant to ship in browser code. So on a fresh project,
+with row level security off, anyone holding that key can read every lead, user
+row and stored credential over plain HTTP, and can `DELETE` or `TRUNCATE` them.
+
+This CRM never uses PostgREST or the Supabase client libraries — Laravel
+connects straight to Postgres as the tables' owner — so the fix is to take the
+access away rather than write a policy for every table. The migration
+`2026_04_14_000002_close_supabase_public_api_access` does it, and is a no-op
+on a database where those roles don't exist:
+
+- revokes both roles from the tables, sequences, functions and the schema,
+- revokes the *default* privileges too, so a later migration can't reopen it,
+- enables RLS on every table as a second line — with no policies a non-owner
+  reads nothing, and Postgres exempts owners from RLS, so the app is unaffected.
+
+Check it took effect. This should return no rows:
+
+```sql
+select grantee, table_name from information_schema.role_table_grants
+where table_schema = 'public' and grantee in ('anon', 'authenticated');
+```
+
+Supabase's own database linter (Dashboard → Advisors) should then report no
+`rls_disabled_in_public` errors. The remaining `rls_enabled_no_policy` notices
+are expected and correct here: no policy is needed for roles that have no
+access at all.
+
 ## Secrets
 
 Never commit `.env`, database passwords, Supabase service-role keys, AI
