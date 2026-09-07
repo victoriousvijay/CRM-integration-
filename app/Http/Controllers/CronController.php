@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Runs the Laravel scheduler and drains a batch of queued jobs on every
@@ -21,11 +22,24 @@ class CronController extends Controller
 {
     public function run(Request $request, Schedule $schedule)
     {
-        // Vercel automatically sends "Authorization: Bearer $CRON_SECRET" when
-        // invoking a scheduled Cron Job, if a CRON_SECRET env var is set —
+        // Vercel sends "Authorization: Bearer $CRON_SECRET" when it invokes a
+        // scheduled Cron Job, provided CRON_SECRET is set —
         // https://vercel.com/docs/cron-jobs/manage-cron-jobs#securing-cron-jobs
+        //
+        // Refuse when no secret is configured rather than running for anyone.
+        // This endpoint runs the whole scheduler and drains the queue, so left
+        // open it is both a way to burn a plan's compute on demand and a way to
+        // fire the business actions the schedule owns — digests, notifications,
+        // lead assignment, paid AI calls.
         $secret = config('app.cron_secret');
-        if ($secret && $request->header('Authorization') !== "Bearer {$secret}") {
+
+        if (blank($secret)) {
+            Log::warning('Cron endpoint refused: CRON_SECRET is not configured. See DEPLOYMENT.md.');
+
+            abort(403);
+        }
+
+        if (! hash_equals("Bearer {$secret}", (string) $request->header('Authorization'))) {
             abort(403);
         }
 
