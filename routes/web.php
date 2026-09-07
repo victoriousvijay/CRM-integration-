@@ -344,13 +344,24 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
         Route::delete('/leads/{lead}/photos/{photo}', [LeadController::class, 'deletePhoto'])->name('leads.photos.delete');
     });
 
-    // ── Properties: admin, agent, acquisition_agent, field_scout, listing_agent, buyers_agent ──
+    // ── Properties: reading ─────────────────────────────────────────
+    // A field scout may look at the book of properties; they submit new ones
+    // through their own route below, not through the CRM's add/edit form, and
+    // PropertyPolicy refuses them there. Letting them through the door only to
+    // be turned away by the policy is an Access Denied page on a link they were
+    // shown, so the two lists have to match.
     Route::middleware('role:admin,agent,acquisition_agent,field_scout,listing_agent,buyers_agent')->group(function () {
         Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
         // Declared before the {property} route so "create" isn't swallowed as an id.
+        Route::get('/properties/{property}', [PropertyController::class, 'show'])
+            ->whereNumber('property')
+            ->name('properties.show');
+    });
+
+    // ── Properties: adding and editing ──────────────────────────────
+    Route::middleware('role:admin,agent,acquisition_agent,listing_agent,buyers_agent')->group(function () {
         Route::get('/properties/create', [PropertyController::class, 'create'])->name('properties.create');
         Route::post('/properties', [PropertyController::class, 'storeStandalone'])->name('properties.store');
-        Route::get('/properties/{property}', [PropertyController::class, 'show'])->name('properties.show');
         Route::get('/properties/{property}/edit', [PropertyController::class, 'edit'])->name('properties.edit');
         Route::put('/properties/{property}', [PropertyController::class, 'update'])->name('properties.update');
         Route::delete('/properties/{property}', [PropertyController::class, 'destroy'])->name('properties.destroy');

@@ -200,7 +200,8 @@ class WhatsappAutomationTest extends TestCase
             'password' => bcrypt('password'),
         ]);
 
-        $this->actingAs($broker)->get(route('settings.whatsapp'))->assertForbidden();
+        // Refused, but sent home rather than walled off — see RoleMiddleware.
+        $this->actingAs($broker)->get(route('settings.whatsapp'))->assertRedirect(route('broker.index'));
         $this->actingAs($this->admin)->get(route('settings.whatsapp'))->assertOk();
     }
 }
