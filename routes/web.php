@@ -185,6 +185,7 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
         Route::get('/leads', [BrokerLeadController::class, 'index'])->name('leads.index');
         Route::get('/leads/create', [BrokerLeadController::class, 'create'])->name('leads.create');
         Route::post('/leads', [BrokerLeadController::class, 'store'])->name('leads.store');
+        Route::patch('/leads/{lead}', [BrokerLeadController::class, 'update'])->name('leads.update');
     });
 
     // A lead's client photo. Outside the CRM-only role group because the

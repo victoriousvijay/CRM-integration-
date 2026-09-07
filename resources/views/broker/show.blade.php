@@ -3,92 +3,156 @@
 @section('title', $property->address)
 
 @section('content')
-<a href="{{ route('broker.index') }}" class="btn btn-outline-secondary mb-3">&larr; {{ __('Back to properties') }}</a>
+<a href="{{ route('broker.index') }}" class="bp-back">
+    @include('broker._icon', ['name' => 'arrow-left', 'size' => 16])
+    {{ __('Back to properties') }}
+</a>
 
-@include('properties._gallery')
+@php
+    $price = $property->list_price ?: $property->asking_price ?: $property->estimated_value;
+    $type = \App\Services\CustomFieldService::getOptions('property_type')[$property->property_type] ?? $property->property_type;
 
-<div class="card">
-    <div class="card-body">
-        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2">
-            <div>
-                <h2 class="mb-1">{{ $property->address }}</h2>
-                <p class="text-secondary mb-2">{{ $property->city }}, {{ $property->state }} {{ $property->zip_code }}</p>
-                <a href="{{ $property->map_link }}" target="_blank" rel="noopener noreferrer"
-                   class="btn btn-outline-primary btn-sm">
-                    {{ __('Open in Google Maps') }}
-                </a>
+    $facts = array_filter([
+        __('Type') => $type,
+        __('Condition') => $property->condition
+            ? (\App\Services\CustomFieldService::getOptions('property_condition')[$property->condition] ?? $property->condition)
+            : null,
+        __('Status') => $property->listing_status ? __(ucfirst($property->listing_status)) : null,
+        __('Bedrooms') => $property->bedrooms,
+        __('Bathrooms') => $property->bathrooms,
+        __('Square Footage') => $property->square_footage ? number_format($property->square_footage) : null,
+        __('Lot Size') => $property->lot_size,
+        __('Year Built') => $property->year_built,
+        __('Listed On') => $property->listed_at?->format('d M Y'),
+    ], fn ($value) => filled($value));
+
+    $shareText = \App\Support\PropertyShare::message($property, auth()->user());
+@endphp
+
+<div class="bp-split">
+    <div>
+        @if($property->images->isNotEmpty())
+            @php $galleryId = 'gallery-'.$property->id; @endphp
+            <img id="{{ $galleryId }}-main" class="bp-gallery__main"
+                 src="{{ $property->images->first()->url() }}" alt="{{ $property->address }}">
+
+            @if($property->images->count() > 1)
+                <div class="bp-gallery__strip">
+                    @foreach($property->images as $i => $image)
+                        <img src="{{ $image->url() }}" alt="{{ $image->filename }}" loading="lazy"
+                             class="bp-gallery__thumb {{ $i === 0 ? 'is-active' : '' }}"
+                             data-gallery="{{ $galleryId }}">
+                    @endforeach
+                </div>
+            @endif
+        @else
+            <div class="bp-card">
+                <div class="bp-empty">
+                    <span class="bp-empty__icon">@include('broker._icon', ['name' => 'building', 'size' => 30])</span>
+                    <p class="bp-empty__title">{{ __('No photos for this property yet') }}</p>
+                </div>
             </div>
-            <a href="{{ route('broker.leads.create', ['property' => $property->id]) }}" class="btn btn-primary">
-                {{ __('Log an enquiry') }}
-            </a>
-        </div>
-
-        @php $price = $property->list_price ?: $property->asking_price ?: $property->estimated_value; @endphp
-        <div class="h1 mb-4">{{ $price ? number_format((float) $price) : __('Price on request') }}</div>
-
-        <div class="datagrid">
-            <div class="datagrid-item">
-                <div class="datagrid-title">{{ __('Type') }}</div>
-                <div class="datagrid-content">
-                    {{ \App\Services\CustomFieldService::getOptions('property_type')[$property->property_type] ?? $property->property_type }}
-                </div>
-            </div>
-            @if($property->condition)
-                <div class="datagrid-item">
-                    <div class="datagrid-title">{{ __('Condition') }}</div>
-                    <div class="datagrid-content">
-                        {{ \App\Services\CustomFieldService::getOptions('property_condition')[$property->condition] ?? $property->condition }}
-                    </div>
-                </div>
-            @endif
-            @if($property->listing_status)
-                <div class="datagrid-item">
-                    <div class="datagrid-title">{{ __('Status') }}</div>
-                    <div class="datagrid-content">{{ __(ucfirst($property->listing_status)) }}</div>
-                </div>
-            @endif
-            @if($property->bedrooms)
-                <div class="datagrid-item">
-                    <div class="datagrid-title">{{ __('Bedrooms') }}</div>
-                    <div class="datagrid-content">{{ $property->bedrooms }}</div>
-                </div>
-            @endif
-            @if($property->bathrooms)
-                <div class="datagrid-item">
-                    <div class="datagrid-title">{{ __('Bathrooms') }}</div>
-                    <div class="datagrid-content">{{ $property->bathrooms }}</div>
-                </div>
-            @endif
-            @if($property->square_footage)
-                <div class="datagrid-item">
-                    <div class="datagrid-title">{{ __('Square Footage') }}</div>
-                    <div class="datagrid-content">{{ number_format($property->square_footage) }}</div>
-                </div>
-            @endif
-            @if($property->lot_size)
-                <div class="datagrid-item">
-                    <div class="datagrid-title">{{ __('Lot Size') }}</div>
-                    <div class="datagrid-content">{{ $property->lot_size }}</div>
-                </div>
-            @endif
-            @if($property->year_built)
-                <div class="datagrid-item">
-                    <div class="datagrid-title">{{ __('Year Built') }}</div>
-                    <div class="datagrid-content">{{ $property->year_built }}</div>
-                </div>
-            @endif
-            @if($property->listed_at)
-                <div class="datagrid-item">
-                    <div class="datagrid-title">{{ __('Listed On') }}</div>
-                    <div class="datagrid-content">{{ $property->listed_at->format('d M Y') }}</div>
-                </div>
-            @endif
-        </div>
-
-        @if($property->notes)
-            <h3 class="mt-4">{{ __('Notes') }}</h3>
-            <p class="mb-0" style="white-space: pre-line;">{{ $property->notes }}</p>
         @endif
+
+        <div class="bp-card bp-mt-lg">
+            <div class="bp-card__body">
+                <div class="bp-facts">
+                    @foreach($facts as $label => $value)
+                        <div>
+                            <div class="bp-fact__label">{{ $label }}</div>
+                            <div class="bp-fact__value">{{ $value }}</div>
+                        </div>
+                    @endforeach
+                </div>
+
+                @if($property->notes)
+                    <h2 class="bp-fact__label bp-mt-lg" style="margin-bottom:0.4rem;">{{ __('Notes') }}</h2>
+                    <p style="white-space: pre-line;">{{ $property->notes }}</p>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    {{-- What the broker came here to do: read the price, find the place, send it
+         to a client, log the one standing in front of them. --}}
+    <div>
+        <div class="bp-card bp-sticky">
+            <div class="bp-card__body">
+                <span class="bp-chip">{{ $type }}</span>
+
+                <h1 class="bp-title" style="margin-top:0.6rem;">{{ $property->address }}</h1>
+                <p class="bp-subtitle">{{ $property->city }}, {{ $property->state }} {{ $property->zip_code }}</p>
+
+                <p class="bp-price bp-mt">{{ $price ? number_format((float) $price) : __('Price on request') }}</p>
+                @if($price)
+                    <p class="bp-subtitle" style="font-size:0.8125rem;">{{ __('Asking price') }}</p>
+                @endif
+
+                <div class="bp-stack bp-mt-lg">
+                    <a href="{{ route('broker.leads.create', ['property' => $property->id]) }}"
+                       class="bp-btn bp-btn--primary bp-btn--lg">
+                        @include('broker._icon', ['name' => 'plus', 'size' => 18])
+                        {{ __('Log an enquiry') }}
+                    </a>
+                    <a href="https://wa.me/?text={{ rawurlencode($shareText) }}" target="_blank" rel="noopener noreferrer"
+                       class="bp-btn bp-btn--ghost">
+                        @include('broker._icon', ['name' => 'share', 'size' => 18])
+                        {{ __('Send to a client') }}
+                    </a>
+                    <a href="{{ $property->map_link }}" target="_blank" rel="noopener noreferrer" class="bp-btn bp-btn--ghost">
+                        @include('broker._icon', ['name' => 'map-pin', 'size' => 18])
+                        {{ __('Open in Google Maps') }}
+                    </a>
+                    <button type="button" class="bp-btn bp-btn--ghost" id="copy-details"
+                            data-text="{{ $shareText }}" data-done="{{ __('Copied') }}">
+                        @include('broker._icon', ['name' => 'copy', 'size' => 18])
+                        <span>{{ __('Copy details') }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<script>
+// Thumbnails swap into the main image. Delegated, so it costs one listener
+// however many photos a property has.
+document.addEventListener('click', function (event) {
+    var thumb = event.target.closest('.bp-gallery__thumb');
+    if (!thumb) return;
+
+    var main = document.getElementById(thumb.dataset.gallery + '-main');
+    if (!main) return;
+
+    main.src = thumb.src;
+    thumb.parentElement.querySelectorAll('.bp-gallery__thumb')
+        .forEach(function (el) { el.classList.toggle('is-active', el === thumb); });
+});
+
+document.getElementById('copy-details').addEventListener('click', function () {
+    var button = this;
+    var label = button.querySelector('span');
+    var original = label.textContent;
+
+    function done() {
+        label.textContent = button.dataset.done;
+        setTimeout(function () { label.textContent = original; }, 1800);
+    }
+
+    // navigator.clipboard needs a secure context and is missing on some older
+    // Android browsers, so fall back to a hidden textarea rather than silently
+    // doing nothing when a broker taps this.
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(button.dataset.text).then(done);
+        return;
+    }
+
+    var area = document.createElement('textarea');
+    area.value = button.dataset.text;
+    area.style.cssText = 'position:fixed;top:-1000px;';
+    document.body.appendChild(area);
+    area.select();
+    try { document.execCommand('copy'); done(); } finally { area.remove(); }
+});
+</script>
 @endsection

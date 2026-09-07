@@ -1,0 +1,584 @@
+/*
+ * Broker portal — the whole stylesheet.
+ *
+ * The broker is field staff on a phone between site visits, not an operator at
+ * a desk: three screens, each one readable outdoors and workable one-handed.
+ *
+ * Self-contained on purpose. The rest of the app pulls Tabler from a CDN, and
+ * the service worker's cache-first rule answers a failed asset fetch with an
+ * empty 408 — so one flaky moment on mobile data and the portal renders with no
+ * styles at all. A four-screen portal does not need a 536KB framework to avoid
+ * that, so everything it needs is here, same-origin, in one file.
+ */
+
+:root {
+    --bp-accent: #0054a6;
+    --bp-accent-strong: #003f7d;
+    --bp-accent-soft: #e8f1fb;
+    --bp-ink: #0f172a;
+    --bp-muted: #64748b;
+    --bp-line: #e6eaf0;
+    --bp-surface: #ffffff;
+    --bp-ground: #f5f7fa;
+    --bp-danger: #c8253d;
+    --bp-radius: 16px;
+    --bp-radius-sm: 10px;
+    --bp-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px -12px rgba(15, 23, 42, 0.14);
+    --bp-shadow-lift: 0 2px 4px rgba(15, 23, 42, 0.05), 0 18px 36px -16px rgba(15, 23, 42, 0.24);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bp-accent: #4d9bef;
+        --bp-accent-strong: #7ab6f5;
+        --bp-accent-soft: #16263c;
+        --bp-ink: #e8eef7;
+        --bp-muted: #93a3b8;
+        --bp-line: #23303f;
+        --bp-surface: #131c26;
+        --bp-ground: #0b1118;
+        --bp-danger: #f2748a;
+        --bp-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px -12px rgba(0, 0, 0, 0.7);
+        --bp-shadow-lift: 0 2px 4px rgba(0, 0, 0, 0.5), 0 18px 36px -16px rgba(0, 0, 0, 0.8);
+    }
+}
+
+/* ── Base ──────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body.bp {
+    margin: 0;
+    background: var(--bp-ground);
+    color: var(--bp-ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+.bp a { text-decoration: none; }
+/*
+ * Only bare links take the accent colour. `.bp a` would otherwise outrank a
+ * single-class component rule on specificity — which painted the text of
+ * `a.bp-btn--primary` accent-on-accent, an invisible label on a solid button.
+ * Every link that carries a class in this file sets its own colour.
+ */
+.bp a:not([class]) { color: var(--bp-accent); }
+.bp a:not([class]):hover { color: var(--bp-accent-strong); }
+.bp img { max-width: 100%; }
+.bp h1, .bp h2, .bp h3 { margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+.bp p { margin: 0; }
+.bp button { font: inherit; }
+
+.bp-container {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* ── Layout helpers ────────────────────────────────────────────────── */
+
+.bp-row { display: flex; align-items: center; gap: 0.5rem; }
+.bp-row--between { justify-content: space-between; }
+.bp-row--wrap { flex-wrap: wrap; }
+.bp-row--top { align-items: flex-start; }
+.bp-push { margin-left: auto; }
+.bp-stack { display: grid; gap: 0.5rem; }
+.bp-fill { flex: 1 1 auto; min-width: 0; }
+.bp-hide-sm { display: none; }
+@media (min-width: 576px) { .bp-hide-sm { display: inline; } }
+
+.bp-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+/* Detail page: photos beside the action card once there is room for both. */
+.bp-split { display: grid; gap: 1.5rem; }
+@media (min-width: 992px) { .bp-split { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); } }
+
+/* Scoped under `.bp` so they outrank the element resets above — an unscoped
+   `.bp-mt-lg` loses to `.bp h2 { margin: 0 }` on specificity. */
+.bp .bp-mt { margin-top: 1rem; }
+.bp .bp-mt-lg { margin-top: 1.75rem; }
+.bp .bp-mb { margin-bottom: 1rem; }
+.bp .bp-mb-lg { margin-bottom: 1.5rem; }
+
+@media print { .bp-print-hide { display: none !important; } }
+
+/* ── Shell ─────────────────────────────────────────────────────────── */
+
+.bp-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: color-mix(in srgb, var(--bp-surface) 88%, transparent);
+    backdrop-filter: saturate(180%) blur(12px);
+    border-bottom: 1px solid var(--bp-line);
+}
+.bp-header__inner { display: flex; align-items: center; gap: 1rem; min-height: 60px; }
+
+.bp-nav { display: flex; gap: 0.25rem; }
+.bp-nav__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--bp-muted);
+    transition: background-color 0.15s, color 0.15s;
+}
+.bp-nav__link:hover { background: var(--bp-accent-soft); color: var(--bp-accent); }
+.bp-nav__link.is-active, .bp-nav__link.is-active:hover { background: var(--bp-accent); color: #fff; }
+
+.bp-user { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; color: var(--bp-muted); }
+.bp-avatar {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    background: var(--bp-accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.8rem;
+    flex: 0 0 auto;
+}
+
+.bp-main { padding: 1.5rem 0 2rem; }
+
+/* The bottom bar is the whole navigation on a phone, so the top-bar pills and
+   the sign-out control step aside there rather than wrapping onto a second row. */
+.bp-tabbar { display: none; }
+
+@media (max-width: 767.98px) {
+    .bp-header .bp-nav, .bp-header .bp-signout { display: none; }
+    .bp-tabbar {
+        position: fixed;
+        left: 0; right: 0; bottom: 0;
+        z-index: 40;
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 1fr;
+        background: color-mix(in srgb, var(--bp-surface) 94%, transparent);
+        backdrop-filter: saturate(180%) blur(12px);
+        border-top: 1px solid var(--bp-line);
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+    .bp-tabbar__link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.15rem;
+        padding: 0.5rem 0 0.45rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        color: var(--bp-muted);
+    }
+    .bp-tabbar__link.is-active { color: var(--bp-accent); }
+    .bp-main { padding-bottom: 5.5rem; }
+}
+
+/* ── Headings ──────────────────────────────────────────────────────── */
+
+.bp-title { font-size: 1.5rem; color: var(--bp-ink); }
+.bp-subtitle { color: var(--bp-muted); margin-top: 0.15rem; font-size: 0.9375rem; }
+
+/* ── Cards ─────────────────────────────────────────────────────────── */
+
+.bp-card {
+    background: var(--bp-surface);
+    border: 1px solid var(--bp-line);
+    border-radius: var(--bp-radius);
+    box-shadow: var(--bp-shadow);
+}
+.bp-card__body { padding: 1.25rem; }
+
+/* ── Property card ─────────────────────────────────────────────────── */
+
+.bp-property {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    background: var(--bp-surface);
+    border: 1px solid var(--bp-line);
+    border-radius: var(--bp-radius);
+    box-shadow: var(--bp-shadow);
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.bp-property:hover { transform: translateY(-3px); box-shadow: var(--bp-shadow-lift); }
+
+.bp-property__media {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 10;
+    background: linear-gradient(140deg, var(--bp-accent-soft), var(--bp-ground));
+    overflow: hidden;
+}
+.bp-property__media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* No photo yet is the normal case for a freshly added property, so it gets a
+   deliberate placeholder rather than a card of a different height. */
+.bp-property__placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--bp-accent);
+    opacity: 0.35;
+}
+
+.bp-property__price {
+    position: absolute;
+    left: 0.75rem;
+    bottom: 0.75rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(9, 16, 26, 0.72);
+    backdrop-filter: blur(6px);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    letter-spacing: -0.01em;
+}
+.bp-property__tags { position: absolute; right: 0.75rem; top: 0.75rem; display: flex; gap: 0.35rem; }
+
+.bp-property__body { padding: 1rem 1.1rem 1.1rem; display: flex; flex-direction: column; flex: 1; }
+.bp-property__address { font-size: 1.0625rem; margin-bottom: 0.15rem; }
+.bp-property__address a { color: var(--bp-ink); }
+.bp-property__city { color: var(--bp-muted); font-size: 0.875rem; margin-bottom: 0.9rem; }
+
+.bp-specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    margin-top: auto;
+    padding-top: 0.85rem;
+    border-top: 1px solid var(--bp-line);
+    color: var(--bp-muted);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+.bp-spec { display: inline-flex; align-items: center; gap: 0.35rem; color: inherit; }
+.bp-spec svg { opacity: 0.7; flex: 0 0 auto; }
+
+/* ── Chips ─────────────────────────────────────────────────────────── */
+
+.bp-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.22rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--bp-accent-soft);
+    color: var(--bp-accent);
+    white-space: nowrap;
+}
+.bp-chip--solid { background: rgba(9, 16, 26, 0.72); backdrop-filter: blur(6px); color: #fff; }
+.bp-chip--ok { background: #e7f7ee; color: #17694a; }
+.bp-chip--warn { background: #fdf1dd; color: #8a5a08; }
+.bp-chip--muted { background: var(--bp-ground); color: var(--bp-muted); }
+
+@media (prefers-color-scheme: dark) {
+    .bp-chip--ok { background: #10281d; color: #6ddaa6; }
+    .bp-chip--warn { background: #2c2110; color: #f0c069; }
+}
+
+/* ── Toolbar ───────────────────────────────────────────────────────── */
+
+.bp-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+    background: var(--bp-surface);
+    border: 1px solid var(--bp-line);
+    border-radius: var(--bp-radius);
+    padding: 0.6rem;
+    box-shadow: var(--bp-shadow);
+}
+.bp-toolbar__search { position: relative; flex: 1 1 240px; min-width: 0; }
+.bp-toolbar__search svg {
+    position: absolute;
+    left: 0.7rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--bp-muted);
+    pointer-events: none;
+}
+.bp-toolbar__search .bp-input { padding-left: 2.2rem; }
+.bp-toolbar .bp-input, .bp-toolbar .bp-select { border-color: transparent; background: var(--bp-ground); }
+
+/* ── Buttons ───────────────────────────────────────────────────────── */
+
+.bp-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    padding: 0.55rem 1.05rem;
+    border: 1px solid transparent;
+    border-radius: var(--bp-radius-sm);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, transform 0.1s;
+}
+.bp-btn:active { transform: translateY(1px); }
+.bp-btn--primary { background: var(--bp-accent); color: #fff; }
+.bp-btn--primary:hover { background: var(--bp-accent-strong); color: #fff; }
+.bp-btn--ghost { background: var(--bp-surface); border-color: var(--bp-line); color: var(--bp-ink); }
+.bp-btn--ghost:hover { background: var(--bp-ground); color: var(--bp-ink); }
+.bp-btn--block { width: 100%; }
+.bp-btn--lg { padding: 0.75rem 1.35rem; font-size: 1rem; }
+.bp-btn--sm { padding: 0.35rem 0.75rem; font-size: 0.8125rem; }
+
+/* ── Detail page ───────────────────────────────────────────────────── */
+
+.bp-gallery__main {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: var(--bp-radius);
+    background: var(--bp-accent-soft);
+    display: block;
+}
+.bp-gallery__strip {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: thin;
+}
+.bp-gallery__thumb {
+    flex: 0 0 auto;
+    width: 92px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: var(--bp-radius-sm);
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.15s, opacity 0.15s;
+    opacity: 0.72;
+}
+.bp-gallery__thumb:hover { opacity: 1; }
+.bp-gallery__thumb.is-active { border-color: var(--bp-accent); opacity: 1; }
+
+/* The action card is what the broker came for, so on a tall screen it stays in
+   reach instead of scrolling away above the spec list. */
+@media (min-width: 992px) { .bp-sticky { position: sticky; top: 84px; } }
+
+.bp-price { font-size: 1.875rem; font-weight: 800; letter-spacing: -0.03em; }
+
+.bp-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.85rem 1rem; }
+@media (min-width: 576px) { .bp-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.bp-fact__label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--bp-muted);
+}
+.bp-fact__value { font-weight: 600; color: var(--bp-ink); }
+
+/* ── Enquiry list ──────────────────────────────────────────────────── */
+
+.bp-enquiry { display: flex; gap: 0.9rem; padding: 1rem 1.1rem; border-bottom: 1px solid var(--bp-line); }
+.bp-enquiry:last-child { border-bottom: 0; }
+.bp-enquiry__photo {
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 999px;
+    object-fit: cover;
+    background: var(--bp-accent-soft);
+}
+.bp-enquiry__initial { display: grid; place-items: center; font-weight: 700; color: var(--bp-accent); }
+.bp-enquiry__name { font-weight: 700; color: var(--bp-ink); }
+.bp-enquiry__meta { color: var(--bp-muted); font-size: 0.875rem; }
+
+/* ── Stats ─────────────────────────────────────────────────────────── */
+
+.bp-stats { display: grid; gap: 0.75rem; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+.bp-stat {
+    background: var(--bp-surface);
+    border: 1px solid var(--bp-line);
+    border-radius: var(--bp-radius);
+    box-shadow: var(--bp-shadow);
+    padding: 0.9rem 1rem;
+}
+.bp-stat__value { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; }
+.bp-stat__label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--bp-muted);
+}
+
+/* ── Forms ─────────────────────────────────────────────────────────── */
+
+.bp-label { display: block; font-weight: 600; font-size: 0.875rem; margin-bottom: 0.35rem; }
+.bp-label--required::after { content: " *"; color: var(--bp-danger); }
+
+.bp-input, .bp-select, .bp-textarea {
+    display: block;
+    width: 100%;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid var(--bp-line);
+    border-radius: var(--bp-radius-sm);
+    background: var(--bp-surface);
+    color: var(--bp-ink);
+    /* 16px keeps iOS from zooming the page in when a field takes focus. */
+    font-size: 1rem;
+    font-family: inherit;
+    line-height: 1.4;
+}
+.bp-textarea { resize: vertical; min-height: 6rem; }
+.bp-select {
+    appearance: none;
+    padding-right: 2.2rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6l6 -6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem center;
+}
+.bp-input:focus, .bp-select:focus, .bp-textarea:focus {
+    outline: none;
+    border-color: var(--bp-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--bp-accent) 18%, transparent);
+}
+.bp-input.is-invalid, .bp-select.is-invalid, .bp-textarea.is-invalid { border-color: var(--bp-danger); }
+.bp-error { color: var(--bp-danger); font-size: 0.8125rem; margin-top: 0.3rem; }
+.bp-hint { color: var(--bp-muted); font-size: 0.8125rem; margin-top: 0.3rem; }
+
+.bp-fields { display: grid; gap: 1rem; }
+@media (min-width: 576px) { .bp-fields--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.bp-field--wide { grid-column: 1 / -1; }
+
+.bp-fieldset { border: 0; padding: 0; margin: 0 0 1.75rem; }
+.bp-fieldset:last-of-type { margin-bottom: 0; }
+.bp-legend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--bp-muted);
+    margin-bottom: 0.85rem;
+    padding: 0 0 0.5rem;
+    border-bottom: 1px solid var(--bp-line);
+}
+
+/* The photo field is a camera button on a phone, so it reads as one. */
+.bp-photo {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 0.75rem;
+    border: 1px dashed var(--bp-line);
+    border-radius: var(--bp-radius-sm);
+    background: var(--bp-ground);
+}
+.bp-photo__preview {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--bp-radius-sm);
+    overflow: hidden;
+    background: var(--bp-accent-soft);
+    display: grid;
+    place-items: center;
+    color: var(--bp-accent);
+    flex: 0 0 auto;
+}
+.bp-photo__preview img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── Empty state ───────────────────────────────────────────────────── */
+
+.bp-empty { text-align: center; padding: 3.5rem 1.5rem; }
+.bp-empty__icon {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1rem;
+    border-radius: 999px;
+    background: var(--bp-accent-soft);
+    color: var(--bp-accent);
+}
+.bp-empty__title { font-weight: 700; font-size: 1.125rem; margin-bottom: 0.35rem; color: var(--bp-ink); }
+.bp-empty__text { color: var(--bp-muted); margin: 0 auto; max-width: 34rem; }
+
+/* ── Misc ──────────────────────────────────────────────────────────── */
+
+.bp-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.85rem 1rem;
+    border-radius: var(--bp-radius-sm);
+    background: #e7f7ee;
+    color: #17694a;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+}
+@media (prefers-color-scheme: dark) { .bp-alert { background: #10281d; color: #6ddaa6; } }
+
+.bp-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--bp-muted);
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+.bp-back:hover { color: var(--bp-accent); }
+
+/* Laravel's paginator renders the app's Tabler partial; these are its classes. */
+.bp .pagination { display: flex; flex-wrap: wrap; gap: 0.25rem; list-style: none; padding: 0; margin: 0; }
+.bp .page-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: var(--bp-radius-sm);
+    border: 1px solid var(--bp-line);
+    background: var(--bp-surface);
+    color: var(--bp-ink);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+.bp .page-link:hover { background: var(--bp-accent-soft); color: var(--bp-accent); }
+.bp .page-item.active .page-link { background: var(--bp-accent); border-color: var(--bp-accent); color: #fff; }
+.bp .page-item.disabled .page-link { opacity: 0.45; pointer-events: none; }
+.bp .pagination .icon { width: 1em; height: 1em; }
+
+/* ── Shared partials ───────────────────────────────────────────────── */
+/*
+ * The platform footer and the PWA install banner are shared with the CRM,
+ * which has Bootstrap utilities from Tabler. This portal does not, so the
+ * handful of classes those partials use are defined here rather than forking
+ * the partials — the attribution has to look right on every screen.
+ */
+.bp .text-center { text-align: center; }
+.bp .text-secondary { color: var(--bp-muted); }
+.bp .py-4 { padding: 1.5rem 0; }
+.bp .mt-1 { margin-top: 0.25rem; }
+.bp .small { font-size: 0.8125rem; }
+.bp .d-inline-flex { display: inline-flex; }
+.bp .align-items-center { align-items: center; }
+.bp .gap-2 { gap: 0.5rem; }
+.bp .text-decoration-none { text-decoration: none; }

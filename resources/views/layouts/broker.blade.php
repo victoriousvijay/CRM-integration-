@@ -6,53 +6,77 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', __('Properties')) - {{ \App\Support\Brand::name() }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/css/tabler.min.css">
+    {{-- One same-origin stylesheet, no CDN: see the note at the top of it. --}}
+    <link rel="stylesheet" href="{{ asset('css/broker.css') }}">
+    @include('layouts._pwa')
 </head>
-<body class="d-flex flex-column">
+<body class="bp">
 @include('layouts._splash')
-<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0-beta20/dist/js/tabler.min.js" defer></script>
 
-<header class="navbar navbar-expand-md navbar-light d-print-none border-bottom bg-white">
-    <div class="container-xl">
-        <h1 class="navbar-brand navbar-brand-autodark mb-0 me-3">
-            <a href="{{ route('broker.index') }}" class="text-decoration-none">
-                @include('layouts._brand', ['size' => '1.4rem'])
-            </a>
-        </h1>
+@php
+    $onProperties = request()->routeIs('broker.index') || request()->routeIs('broker.show');
+    $onEnquiries = request()->routeIs('broker.leads.*');
+@endphp
 
-        <nav class="d-flex gap-1 ms-2">
-            <a href="{{ route('broker.index') }}"
-               class="btn btn-sm {{ request()->routeIs('broker.index') || request()->routeIs('broker.show') ? 'btn-primary' : 'btn-ghost-secondary' }}">
+<header class="bp-header bp-print-hide">
+    <div class="bp-container bp-header__inner">
+        <a href="{{ route('broker.index') }}" class="bp-row">
+            @include('layouts._brand', ['size' => '1.3rem'])
+        </a>
+
+        <nav class="bp-nav">
+            <a href="{{ route('broker.index') }}" class="bp-nav__link {{ $onProperties ? 'is-active' : '' }}">
+                @include('broker._icon', ['name' => 'home', 'size' => 16])
                 {{ __('Properties') }}
             </a>
-            <a href="{{ route('broker.leads.index') }}"
-               class="btn btn-sm {{ request()->routeIs('broker.leads.*') ? 'btn-primary' : 'btn-ghost-secondary' }}">
+            <a href="{{ route('broker.leads.index') }}" class="bp-nav__link {{ $onEnquiries ? 'is-active' : '' }}">
+                @include('broker._icon', ['name' => 'users', 'size' => 16])
                 {{ __('My Enquiries') }}
             </a>
         </nav>
 
-        <div class="ms-auto d-flex align-items-center gap-3">
-            <span class="text-secondary d-none d-sm-inline">{{ auth()->user()->name }}</span>
-            <form method="POST" action="{{ route('logout') }}">
+        <div class="bp-row bp-push">
+            <span class="bp-user">
+                <span class="bp-avatar">{{ strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span>
+                <span class="bp-hide-sm">{{ auth()->user()->name }}</span>
+            </span>
+            <form method="POST" action="{{ route('logout') }}" class="bp-signout">
                 @csrf
-                <button type="submit" class="btn btn-outline-secondary btn-sm">{{ __('Sign out') }}</button>
+                <button type="submit" class="bp-btn bp-btn--ghost bp-btn--sm">{{ __('Sign out') }}</button>
             </form>
         </div>
     </div>
 </header>
 
-<div class="page-wrapper">
-    <div class="page-body">
-        <div class="container-xl">
-            @if(session('success'))
-                <div class="alert alert-success">{{ session('success') }}</div>
-            @endif
+<main class="bp-main">
+    <div class="bp-container">
+        @if(session('success'))
+            <div class="bp-alert">
+                @include('broker._icon', ['name' => 'check', 'size' => 20])
+                <span>{{ session('success') }}</span>
+            </div>
+        @endif
 
-            @yield('content')
+        @yield('content')
 
-            @include('layouts._platform-footer')
-        </div>
+        @include('layouts._platform-footer')
     </div>
-</div>
+</main>
+
+{{-- The whole navigation on a phone, at thumb height. --}}
+<nav class="bp-tabbar bp-print-hide">
+    <a href="{{ route('broker.index') }}" class="bp-tabbar__link {{ $onProperties ? 'is-active' : '' }}">
+        @include('broker._icon', ['name' => 'home', 'size' => 22])
+        {{ __('Properties') }}
+    </a>
+    <a href="{{ route('broker.leads.index') }}" class="bp-tabbar__link {{ $onEnquiries && ! request()->routeIs('broker.leads.create') ? 'is-active' : '' }}">
+        @include('broker._icon', ['name' => 'users', 'size' => 22])
+        {{ __('Enquiries') }}
+    </a>
+    <a href="{{ route('broker.leads.create') }}" class="bp-tabbar__link {{ request()->routeIs('broker.leads.create') ? 'is-active' : '' }}">
+        @include('broker._icon', ['name' => 'plus', 'size' => 22])
+        {{ __('New') }}
+    </a>
+</nav>
 </body>
 </html>

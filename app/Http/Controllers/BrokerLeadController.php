@@ -27,12 +27,82 @@ class BrokerLeadController extends Controller
      */
     public function index(Request $request)
     {
-        $leads = Lead::where('broker_id', $request->user()->id)
-            ->with(['visitedProperty', 'clientPhoto'])
-            ->latest()
-            ->paginate(20);
+        $mine = fn () => Lead::where('broker_id', $request->user()->id);
 
-        return view('broker.leads.index', compact('leads'));
+        $query = $mine()->with(['visitedProperty', 'clientPhoto']);
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status')->toString());
+        }
+
+        return view('broker.leads.index', [
+            'leads' => $query->latest()->paginate(20)->withQueryString(),
+            'statuses' => CustomFieldService::getOptions('lead_status'),
+            // A broker's own tally of the work they brought in. Counted from
+            // their own rows only, the same restriction as the list itself.
+            'stats' => [
+                'total' => $mine()->count(),
+                'this_month' => $mine()->whereBetween('created_at', [
+                    now()->startOfMonth(), now()->endOfMonth(),
+                ])->count(),
+                'this_week' => $mine()->where('created_at', '>=', now()->startOfWeek())->count(),
+            ],
+        ]);
+    }
+
+    /**
+     * Move one of this broker's own enquiries along.
+     *
+     * A broker learns how a client is progressing days after the visit, and
+     * until now had no way to say so — the enquiry sat at whatever status it was
+     * logged with. They may change the status and append to the notes on their
+     * own enquiries, and nothing else about the lead.
+     */
+    public function update(Request $request, Lead $lead)
+    {
+        abort_unless($lead->broker_id === $request->user()->id, 404);
+
+        $validated = $request->validate([
+            'status' => 'required|string|in:'.implode(',', CustomFieldService::getValidSlugs('lead_status')),
+            'note' => 'nullable|string|max:2000',
+        ]);
+
+        $previousStatus = $lead->status;
+
+        $attributes = ['status' => $validated['status']];
+
+        if (filled($validated['note'] ?? null)) {
+            // Appended, never replaced: the note is the history of the client
+            // relationship and the CRM side reads it too.
+            $stamp = now()->format('d M Y, g:i A');
+            $attributes['notes'] = trim(
+                ($lead->notes ? $lead->notes."\n\n" : '')
+                ."[{$stamp}] ".$validated['note']
+            );
+        }
+
+        $lead->update($attributes);
+
+        if ($previousStatus !== $lead->status) {
+            AuditLog::log('lead.status_changed', $lead);
+
+            // The same hook the CRM fires, so a status change made from the
+            // portal triggers the client's WhatsApp message like any other.
+            event(new \App\Events\LeadStatusChanged($lead, $previousStatus));
+            \App\Facades\Hooks::doAction('lead.status_changed', $lead, $previousStatus);
+        }
+
+        return back()->with('success', __('Enquiry updated.'));
     }
 
     /**
