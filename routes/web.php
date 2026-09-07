@@ -17,6 +17,7 @@ use App\Http\Controllers\PropertyController;
 use App\Http\Controllers\PropertyImageController;
 use App\Http\Controllers\SequenceController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TenantLogoController;
 use App\Http\Controllers\InstallController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\NotificationController;
@@ -100,6 +101,12 @@ Route::get('/p/{slug}/properties', [BuyerPortalController::class, 'properties'])
 
 // Offline fallback (PWA)
 Route::get('/offline', fn () => view('offline'))->name('offline');
+
+// A tenant's logo. Public because the pages carrying a white-label brand are
+// public too — the buyer portal, a hosted lead form, the offline screen.
+Route::get('/tenant-logo/{tenant}', [TenantLogoController::class, 'show'])
+    ->whereNumber('tenant')
+    ->name('tenant.logo');
 
 // PWA manifest. Served by the app rather than as a static file so the
 // installed app carries the signed-in tenant's brand — on a white-label
@@ -716,7 +723,16 @@ Route::middleware(['auth', 'platform.admin'])->prefix('platform-admin')->name('p
     Route::put('/tenants/{tenant}', [\App\Http\Controllers\PlatformAdmin\TenantController::class, 'update'])->name('tenants.update');
     Route::post('/tenants/{tenant}/suspend', [\App\Http\Controllers\PlatformAdmin\TenantController::class, 'suspend'])->name('tenants.suspend');
     Route::post('/tenants/{tenant}/activate', [\App\Http\Controllers\PlatformAdmin\TenantController::class, 'activate'])->name('tenants.activate');
+    Route::post('/tenants/{tenant}/sign-in-as', [\App\Http\Controllers\PlatformAdmin\TenantController::class, 'signInAs'])->name('tenants.signInAs');
 });
+
+// The way back from "sign in as a client": the signed-in account at that point
+// is the client's admin, not a platform admin, so this cannot sit behind the
+// platform.admin gate. It refuses anyone whose session does not carry the
+// platform admin who started it.
+Route::post('/platform-admin/return', [\App\Http\Controllers\PlatformAdmin\TenantController::class, 'returnToPlatform'])
+    ->middleware('auth')
+    ->name('platform-admin.return');
 
 
 

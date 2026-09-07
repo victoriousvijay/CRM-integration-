@@ -355,6 +355,15 @@ class SettingsController extends Controller
             'role_id' => ['required', 'exists:roles,id', \Illuminate\Validation\Rule::in($allowedRoleIds)],
         ]);
 
+        // The seat limit the platform owner set for this client. Null is no
+        // limit, which is what every client is on unless someone said otherwise.
+        if ($tenant->max_users !== null && $tenant->users()->count() >= $tenant->max_users) {
+            return back()->with('error', __(
+                'Your plan allows :count users. Contact your provider to add more.',
+                ['count' => $tenant->max_users]
+            ));
+        }
+
         $agent = User::create([
             'tenant_id' => auth()->user()->tenant_id,
             'role_id' => $request->role_id,

@@ -39,6 +39,8 @@ class Tenant extends Model
         'api_enabled',
         'ai_enabled',
         'buyer_portal_enabled',
+        'broker_portal_enabled',
+        'max_users',
         'buyer_portal_headline',
         'buyer_portal_description',
         'buyer_portal_config',
@@ -68,6 +70,8 @@ class Tenant extends Model
             'ai_briefings_enabled' => 'boolean',
             'ai_api_key' => 'encrypted',
             'buyer_portal_enabled' => 'boolean',
+            'broker_portal_enabled' => 'boolean',
+            'max_users' => 'integer',
             'buyer_portal_config' => 'array',
             'notification_preferences' => 'array',
             'default_dashboard_widgets' => 'array',
@@ -96,6 +100,14 @@ class Tenant extends Model
     public function isRealEstate(): bool
     {
         return $this->business_mode === 'realestate';
+    }
+
+    /**
+     * This tenant's logo. Selected without its bytes — see TenantLogo.
+     */
+    public function logo()
+    {
+        return $this->hasOne(TenantLogo::class)->select(TenantLogo::METADATA_COLUMNS);
     }
 
     public function users()

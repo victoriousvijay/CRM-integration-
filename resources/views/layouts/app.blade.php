@@ -82,6 +82,19 @@
 <body class="layout-fluid" data-bs-theme="{{ auth()->check() && auth()->user()->theme === 'dark' ? 'dark' : 'light' }}">
 @include('layouts._splash')
     <a href="#main-content" class="visually-hidden-focusable">{{ __('Skip to main content') }}</a>
+    @if(session('platform_impersonating'))
+    {{-- Signed in as a client from the platform console. A POST, because it
+         changes who is logged in. --}}
+    <form method="POST" action="{{ route('platform-admin.return') }}"
+          class="alert alert-warning text-center mb-0 rounded-0">
+        @csrf
+        {{ __('You are signed in as') }} <strong>{{ auth()->user()->name }}</strong>
+        ({{ auth()->user()->tenant?->name }}) {{ __('from the platform console.') }}
+        <button type="submit" class="btn btn-link alert-link p-0 align-baseline border-0">
+            {{ __('Return to platform admin') }}
+        </button>
+    </form>
+    @endif
     @if(session('impersonating'))
     <div class="alert alert-warning text-center mb-0 rounded-0">
         {{ __('You are impersonating') }} <strong>{{ auth()->user()->name }}</strong> ({{ auth()->user()->tenant->name }}).

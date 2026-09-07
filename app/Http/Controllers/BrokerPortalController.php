@@ -17,6 +17,8 @@ class BrokerPortalController extends Controller
      */
     public function index(Request $request)
     {
+        $this->ensureEnabled($request);
+
         $query = $this->visibleProperties($request)->with('primaryImage');
 
         if ($request->filled('search')) {
@@ -42,6 +44,8 @@ class BrokerPortalController extends Controller
      */
     public function show(Request $request, Property $property)
     {
+        $this->ensureEnabled($request);
+
         // Resolved through the same visibility rule as the list, so a broker
         // can't reach an unshared property by guessing its id.
         $property = $this->visibleProperties($request)
@@ -50,6 +54,17 @@ class BrokerPortalController extends Controller
             ->firstOrFail();
 
         return view('broker.show', compact('property'));
+    }
+
+    /**
+     * Refuse the portal outright when the platform owner has not given this
+     * client the broker portal. Checked in the controller rather than on the
+     * route so the whole feature — properties and enquiries alike — goes dark
+     * together.
+     */
+    protected function ensureEnabled(Request $request): void
+    {
+        abort_unless($request->user()->tenant?->broker_portal_enabled, 404);
     }
 
     /**

@@ -64,9 +64,28 @@ class Brand
      */
     public static function logo(): ?string
     {
-        $logoPath = static::tenant()?->logo_path;
+        return static::logoFor(static::tenant());
+    }
 
-        return filled($logoPath) ? asset('storage/'.$logoPath) : null;
+    /**
+     * A specific tenant's logo URL, or null when they have none.
+     *
+     * The database copy wins. Logos used to be written to the `public` disk,
+     * which a serverless host mounts read-only outside /tmp — so those uploads
+     * were lost and the brand fell back to a wordmark. `logo_path` is still
+     * honoured second so a deployment on a real disk keeps working.
+     */
+    public static function logoFor(?Tenant $tenant): ?string
+    {
+        if (! $tenant) {
+            return null;
+        }
+
+        if ($tenant->logo) {
+            return route('tenant.logo', ['tenant' => $tenant->getKey(), 'v' => $tenant->logo->updated_at?->timestamp]);
+        }
+
+        return filled($tenant->logo_path) ? asset('storage/'.$tenant->logo_path) : null;
     }
 
     /**

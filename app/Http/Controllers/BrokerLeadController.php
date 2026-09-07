@@ -27,6 +27,8 @@ class BrokerLeadController extends Controller
      */
     public function index(Request $request)
     {
+        $this->ensureEnabled($request);
+
         $mine = fn () => Lead::where('broker_id', $request->user()->id);
 
         $query = $mine()->with(['visitedProperty', 'clientPhoto']);
@@ -110,6 +112,8 @@ class BrokerLeadController extends Controller
      */
     public function create(Request $request)
     {
+        $this->ensureEnabled($request);
+
         return view('broker.leads.create', [
             'properties' => $this->assignedProperties($request),
             'selectedPropertyId' => $request->integer('property') ?: null,
@@ -122,6 +126,8 @@ class BrokerLeadController extends Controller
      */
     public function store(Request $request)
     {
+        $this->ensureEnabled($request);
+
         $broker = $request->user();
 
         $validated = $request->validate([
@@ -185,6 +191,15 @@ class BrokerLeadController extends Controller
 
         return redirect()->route('broker.leads.index')
             ->with('success', __('Enquiry recorded. The team can see it in the CRM.'));
+    }
+
+    /**
+     * The broker portal is a feature the platform owner grants per client;
+     * when it is off, its enquiry screens go with it.
+     */
+    protected function ensureEnabled(Request $request): void
+    {
+        abort_unless($request->user()->tenant?->broker_portal_enabled, 404);
     }
 
     /**

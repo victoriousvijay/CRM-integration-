@@ -7,7 +7,36 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>{{ $tenant->name }} <span class="badge {{ $tenant->status === 'active' ? 'bg-green-lt' : 'bg-red-lt' }}">{{ $tenant->status }}</span></h2>
         <div class="d-flex gap-2">
-            <a href="{{ route('platform-admin.tenants.edit', $tenant) }}" class="btn btn-outline-secondary">Edit Branding</a>
+            <a href="{{ route('platform-admin.tenants.edit', $tenant) }}" class="btn btn-outline-secondary">Branding &amp; Features</a>
+
+            <button type="button" class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#signInAsModal">
+                Sign in as this client
+            </button>
+
+            <div class="modal fade" id="signInAsModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <form method="POST" action="{{ route('platform-admin.tenants.signInAs', $tenant) }}" class="modal-content">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title">Sign in as {{ $tenant->name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-start">
+                            <p>
+                                You will be signed in as this client's admin and can see and change
+                                everything they can. It is recorded in the audit log, and a banner will
+                                show you the way back.
+                            </p>
+                            <label class="form-label required">Your password</label>
+                            <input type="password" name="password" class="form-control" required autocomplete="current-password">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-link" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-warning">Sign in as this client</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
             @if($tenant->status === 'active')
                 <form method="POST" action="{{ route('platform-admin.tenants.suspend', $tenant) }}">@csrf
                     <button class="btn btn-outline-danger">Suspend</button>
@@ -21,6 +50,7 @@
     </div>
 
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+    @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
 
     @if(session('provisioned_full_key'))
         <div class="alert alert-warning">

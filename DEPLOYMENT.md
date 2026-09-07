@@ -125,8 +125,13 @@ the platform admin UI). Run once, against production:
 ```bash
 php artisan tinker
 >>> $user = \App\Models\User::where('email', 'you@yourcompany.com')->first();
->>> $user->update(['is_platform_admin' => true]);
+>>> $user->forceFill(['is_platform_admin' => true])->save();
 ```
+
+`forceFill` rather than `update`: `is_platform_admin` is deliberately left out
+of the model's `$fillable`, so that a request body can never grant itself the
+flag through mass assignment. `update()` would silently drop it and leave you
+with an ordinary tenant admin wondering why `/platform-admin` returns 403.
 
 ## Backups & migration safety (Phase 19)
 
