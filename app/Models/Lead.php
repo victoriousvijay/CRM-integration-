@@ -128,7 +128,7 @@ class Lead extends Model
      */
     public function clientPhoto()
     {
-        return $this->hasOne(LeadClientPhoto::class);
+        return $this->hasOne(LeadClientPhoto::class)->select(LeadClientPhoto::METADATA_COLUMNS);
     }
 
     public function tenant()

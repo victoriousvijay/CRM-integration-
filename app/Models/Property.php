@@ -90,7 +90,10 @@ class Property extends Model
      */
     public function images()
     {
-        return $this->hasMany(PropertyImage::class)->orderByDesc('is_primary')->orderBy('sort_order');
+        return $this->hasMany(PropertyImage::class)
+            ->select(PropertyImage::METADATA_COLUMNS)
+            ->orderByDesc('is_primary')
+            ->orderBy('sort_order');
     }
 
     /**
@@ -98,7 +101,10 @@ class Property extends Model
      */
     public function primaryImage()
     {
-        return $this->hasOne(PropertyImage::class)->orderByDesc('is_primary')->orderBy('sort_order');
+        return $this->hasOne(PropertyImage::class)
+            ->select(PropertyImage::METADATA_COLUMNS)
+            ->orderByDesc('is_primary')
+            ->orderBy('sort_order');
     }
 
     /**

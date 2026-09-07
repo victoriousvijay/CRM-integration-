@@ -85,6 +85,31 @@ class PropertyManagementTest extends TestCase
         $this->assertTrue($property->images()->first()->is_primary);
     }
 
+    public function test_listing_properties_does_not_load_the_image_bytes(): void
+    {
+        $property = Property::create($this->validPayload(['tenant_id' => $this->tenant->id]));
+
+        $property->images()->create([
+            'tenant_id' => $this->tenant->id,
+            'filename' => 'front.jpg',
+            'mime_type' => 'image/jpeg',
+            'size_bytes' => 3,
+            'content' => base64_encode('abc'),
+            'is_primary' => true,
+        ]);
+
+        // The whole file lives base64-encoded in `content`. Selecting it to
+        // render a thumbnail URL would pull every image on the page into
+        // memory, so the relation must leave that column behind.
+        $listed = Property::with('primaryImage')->findOrFail($property->id);
+
+        $this->assertNotNull($listed->primaryImage);
+        $this->assertArrayNotHasKey('content', $listed->primaryImage->getAttributes());
+
+        // Serving the file still works — it fetches the bytes on demand.
+        $this->assertSame('abc', $listed->primaryImage->bytes());
+    }
+
     public function test_a_property_without_a_lead_renders_in_the_list_and_detail_pages(): void
     {
         $property = Property::create($this->validPayload(['tenant_id' => $this->tenant->id]));

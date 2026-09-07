@@ -11,6 +11,16 @@ use Illuminate\Database\Eloquent\Model;
  */
 class LeadClientPhoto extends Model
 {
+    /**
+     * Everything except the base64 bytes — see PropertyImage::METADATA_COLUMNS.
+     *
+     * @var list<string>
+     */
+    public const METADATA_COLUMNS = [
+        'id', 'tenant_id', 'lead_id', 'filename', 'mime_type',
+        'size_bytes', 'created_at', 'updated_at',
+    ];
+
     protected $table = 'lead_client_photos';
 
     protected $fillable = [
@@ -39,7 +49,9 @@ class LeadClientPhoto extends Model
 
     public function bytes(): string
     {
-        return base64_decode($this->content, true) ?: '';
+        $content = $this->content ?? static::whereKey($this->getKey())->value('content');
+
+        return base64_decode((string) $content, true) ?: '';
     }
 
     public function url(): string
