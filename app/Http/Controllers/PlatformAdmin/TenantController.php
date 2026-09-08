@@ -149,6 +149,19 @@ class TenantController extends Controller
             $data[$flag] = $request->boolean($flag);
         }
 
+        // Enforced 2FA on your own tenant is the self-suspend trap again: the
+        // very next click on any CRM tab lands on the 2FA setup screen and
+        // stays there, and the console cannot be used to undo it from inside a
+        // client's session. Refuse it here rather than leave the owner needing
+        // a hand at the database. Clients can still be sold the feature.
+        $selfLockout = $tenant->id === $request->user()->tenant_id
+            && $data['require_2fa']
+            && ! $tenant->require_2fa;
+
+        if ($selfLockout) {
+            $data['require_2fa'] = false;
+        }
+
         // Same reason: the modules that arrive are the whole answer, and one
         // that arrives for a key we do not know is dropped by the rule above.
         $data['enabled_modules'] = array_values(array_intersect(
@@ -176,7 +189,11 @@ class TenantController extends Controller
 
         AuditLog::log('platform.tenant_updated', $tenant);
 
-        return redirect()->route('platform-admin.tenants.show', $tenant)->with('success', 'Client updated.');
+        $redirect = redirect()->route('platform-admin.tenants.show', $tenant)->with('success', 'Client updated.');
+
+        return $selfLockout
+            ? $redirect->with('error', 'Enforced two-factor authentication was not switched on for your own account — it would send every page you open to the 2FA setup screen with no way back. Turn it on for a client instead, or set up 2FA on your profile first.')
+            : $redirect;
     }
 
     /**

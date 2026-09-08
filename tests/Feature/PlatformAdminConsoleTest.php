@@ -325,6 +325,32 @@ class PlatformAdminConsoleTest extends TestCase
         $this->assertSame('suspended', $this->client->fresh()->status);
     }
 
+    public function test_the_platform_owner_cannot_enforce_2fa_on_their_own_tenant(): void
+    {
+        $own = Tenant::find($this->platformAdmin->tenant_id);
+
+        // Same trap as self-suspend: every CRM page would redirect to the 2FA
+        // setup screen, and no screen is left to undo it from.
+        $this->actingAs($this->platformAdmin)
+            ->put(route('platform-admin.tenants.update', $own), [
+                'name' => $own->name,
+                'business_mode' => 'realestate',
+                'require_2fa' => '1',
+            ])->assertRedirect();
+
+        $this->assertFalse((bool) $own->fresh()->require_2fa);
+
+        // A client can still be sold the feature.
+        $this->actingAs($this->platformAdmin)
+            ->put(route('platform-admin.tenants.update', $this->client), [
+                'name' => $this->client->name,
+                'business_mode' => 'realestate',
+                'require_2fa' => '1',
+            ])->assertRedirect();
+
+        $this->assertTrue((bool) $this->client->fresh()->require_2fa);
+    }
+
     public function test_a_tenant_admin_cannot_forge_the_way_into_a_platform_account(): void
     {
         // No session key means nobody handed them this trip.
