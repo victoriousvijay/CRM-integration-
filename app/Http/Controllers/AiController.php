@@ -216,9 +216,33 @@ class AiController extends Controller
         $ollamaUrl = $request->ollama_url ?: $tenant->ai_ollama_url;
         $customUrl = $request->custom_url ?: $tenant->ai_custom_url;
 
+        if (! $apiKey && ! in_array($provider, ['ollama', 'custom'], true)) {
+            return response()->json([
+                'success' => false,
+                'models' => [],
+                'error' => __('Enter your API key first, then fetch the models.'),
+            ]);
+        }
+
         try {
             $providerInstance = AiService::createProvider($provider, $apiKey, null, $ollamaUrl, $customUrl);
             $models = $providerInstance->listModels();
+
+            if ($models === []) {
+                // Empty is ambiguous on its own — a rejected key and a reachable
+                // provider with nothing to offer look identical from here, and
+                // "No models found" sent people hunting for the wrong problem.
+                $reachable = $providerInstance->testConnection();
+
+                return response()->json([
+                    'success' => false,
+                    'models' => [],
+                    'error' => $reachable
+                        ? __('Connected, but the provider listed no usable models. Enter the model name manually.')
+                        : __('The provider rejected these details. Check the API key (and the server URL for Ollama or a custom endpoint).'),
+                ]);
+            }
+
             return response()->json(['success' => true, 'models' => $models]);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('AI model listing failed', ['provider' => $provider, 'error' => $e->getMessage()]);

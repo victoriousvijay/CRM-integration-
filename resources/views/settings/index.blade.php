@@ -953,6 +953,7 @@ Content-Type: application/json</code></pre>
                                         <div id="ai-model-loading" class="text-secondary small mt-1" style="display: none;">
                                             <div class="spinner-border spinner-border-sm me-1" role="status"></div> {{ __('Loading models...') }}
                                         </div>
+                                        <div id="ai-model-error" class="text-danger small mt-1" style="display: none;"></div>
                                     </div>
                                     <div class="d-flex gap-2">
                                         <button type="submit" class="btn btn-primary">{{ __('Save AI Settings') }}</button>
@@ -2618,6 +2619,7 @@ var modelManual = document.getElementById('ai-model-manual');
 var modelToggle = document.getElementById('ai-model-toggle');
 var fetchModelsBtn = document.getElementById('ai-fetch-models-btn');
 var modelLoading = document.getElementById('ai-model-loading');
+var modelError = document.getElementById('ai-model-error');
 var keyHint = document.getElementById('ai-key-hint');
 var usingDropdown = false;
 var currentModel = @json($tenant->ai_model ?? '');
@@ -2640,6 +2642,7 @@ function toggleAiFields() {
     }
 
     // Reset to manual mode when switching providers
+    if (modelError) modelError.style.display = 'none';
     switchToManual();
 }
 
@@ -2673,6 +2676,12 @@ function switchToManual() {
     }
 }
 
+function showModelError(message) {
+    if (!modelError) return;
+    modelError.textContent = message;
+    modelError.style.display = 'block';
+}
+
 function fetchModels() {
     var provider = providerSelect.value;
     var apiKey = document.getElementById('ai-api-key-input').value;
@@ -2680,6 +2689,7 @@ function fetchModels() {
     var customUrl = document.getElementById('ai-custom-url-input').value;
 
     modelLoading.style.display = 'block';
+    if (modelError) modelError.style.display = 'none';
     fetchModelsBtn.disabled = true;
 
     fetch('{{ route("ai.listModels") }}', {
@@ -2697,12 +2707,16 @@ function fetchModels() {
             switchToDropdown(data.models);
         } else {
             switchToManual();
-            modelManual.placeholder = '{{ __('No models found — enter model name manually') }}';
+            modelManual.placeholder = '{{ __('Enter model name manually') }}';
+            // Say what actually went wrong. "No models found" on its own sent
+            // people checking their key when the key was fine, and vice versa.
+            showModelError(data.error || '{{ __('No models found — enter the model name manually.') }}');
         }
     }).catch(function() {
         modelLoading.style.display = 'none';
         fetchModelsBtn.disabled = false;
         switchToManual();
+        showModelError('{{ __('Could not reach the server. Check your connection and try again.') }}');
     });
 }
 
