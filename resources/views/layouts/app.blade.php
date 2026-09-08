@@ -300,6 +300,22 @@
                         @endforeach
                         @endif
 
+                        {{-- The only trace of the platform layer inside the
+                             client-facing product, and only for the person who
+                             owns it: a way back to their own console. Nothing
+                             else about the platform belongs on a CRM screen. --}}
+                        @if(auth()->user()->is_platform_admin && ! session('platform_impersonating'))
+                        <li class="nav-label mt-3 px-3"><hr class="my-0" style="border-color: rgba(255,255,255,0.1);"></li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('platform-admin.tenants.index') }}">
+                                <span class="nav-link-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 21l18 0"/><path d="M5 21v-12l5 -4l5 4v12"/><path d="M19 21v-8l-3 -2"/><path d="M9 21v-4a1 1 0 0 1 1 -1h1a1 1 0 0 1 1 1v4"/></svg>
+                                </span>
+                                <span class="nav-link-title">{{ __('Platform Console') }}</span>
+                            </a>
+                        </li>
+                        @endif
+
                         {{-- ── HELP (always visible) ──────────────── --}}
                         <li class="nav-label mt-3 px-3"><hr class="my-0" style="border-color: rgba(255,255,255,0.1);"></li>
                         <li class="nav-item {{ request()->is('help*') ? 'active' : '' }}">

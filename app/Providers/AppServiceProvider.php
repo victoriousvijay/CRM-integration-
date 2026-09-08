@@ -51,6 +51,20 @@ class AppServiceProvider extends ServiceProvider
         // outside that middleware on purpose, so those pages rendered the whole
         // sidebar in wholesale terms whatever the signed-in user's tenant said.
         // Filled in here for any view the middleware did not already reach.
+        // Clients the platform owner can drop into, for the console's switcher.
+        // Their own tenant is not among them: signing in as yourself does
+        // nothing, and the console is not where they do their own CRM work.
+        View::composer('layouts.platform', function ($view) {
+            $user = auth()->user();
+
+            $view->with('switchableClients', $user
+                ? \App\Models\Tenant::withoutGlobalScopes()
+                    ->where('id', '!=', $user->tenant_id)
+                    ->orderBy('name')
+                    ->get(['id', 'name', 'status'])
+                : collect());
+        });
+
         View::composer('layouts.app', function ($view) {
             if (array_key_exists('businessMode', $view->getData())) {
                 return;

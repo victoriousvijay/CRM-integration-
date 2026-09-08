@@ -76,6 +76,15 @@ class LoginController extends Controller
                 return redirect()->route('broker.index');
             }
 
+            // The platform owner's job is the console, not a CRM workspace.
+            // Landing them on /dashboard put them in the client-facing product
+            // looking at their own empty tenant, which is what made the two
+            // portals feel tangled. Their own CRM is still one click away from
+            // the console's account menu.
+            if ($user->is_platform_admin && ! $request->filled('redirect')) {
+                return redirect()->route('platform-admin.tenants.index');
+            }
+
             return redirect()->intended('/dashboard');
         }
 

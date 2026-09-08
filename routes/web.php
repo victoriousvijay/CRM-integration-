@@ -724,6 +724,9 @@ Route::middleware(['auth', 'platform.admin'])->prefix('platform-admin')->name('p
     Route::post('/tenants/{tenant}/suspend', [\App\Http\Controllers\PlatformAdmin\TenantController::class, 'suspend'])->name('tenants.suspend');
     Route::post('/tenants/{tenant}/activate', [\App\Http\Controllers\PlatformAdmin\TenantController::class, 'activate'])->name('tenants.activate');
     Route::post('/tenants/{tenant}/sign-in-as', [\App\Http\Controllers\PlatformAdmin\TenantController::class, 'signInAs'])->name('tenants.signInAs');
+    // The console's client switcher. The tenant travels in the body so the
+    // control needs no JavaScript — see the partial that renders it.
+    Route::post('/switch', [\App\Http\Controllers\PlatformAdmin\TenantController::class, 'switchTo'])->name('switch');
 });
 
 // The way back from "sign in as a client": the signed-in account at that point

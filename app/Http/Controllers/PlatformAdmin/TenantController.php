@@ -154,7 +154,35 @@ class TenantController extends Controller
     {
         $request->validate(['password' => 'required|string']);
 
+        return $this->enterTenant($request, $tenant);
+    }
+
+    /**
+     * The console's client switcher, which carries the tenant in the body.
+     *
+     * A separate entry point purely so the switcher needs no JavaScript to move
+     * the chosen id into the URL — the one control that gets the owner into a
+     * client should not depend on a CDN having a good minute.
+     */
+    public function switchTo(Request $request)
+    {
+        $validated = $request->validate([
+            'tenant' => 'required|integer|exists:tenants,id',
+            'password' => 'required|string',
+        ]);
+
+        $tenant = Tenant::withoutGlobalScopes()->findOrFail($validated['tenant']);
+
+        return $this->enterTenant($request, $tenant);
+    }
+
+    protected function enterTenant(Request $request, Tenant $tenant)
+    {
         $platformAdmin = $request->user();
+
+        if ($tenant->id === $platformAdmin->tenant_id) {
+            return back()->with('error', 'That is your own account — use "My own CRM" instead.');
+        }
 
         if (! Hash::check($request->password, $platformAdmin->password)) {
             return back()->with('error', 'Incorrect password. Sign-in refused.');

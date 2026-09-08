@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.platform')
 
 @section('title', $tenant->name)
 
 @section('content')
-<div class="container-xl">
+<div>
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2>{{ $tenant->name }} <span class="badge {{ $tenant->status === 'active' ? 'bg-green-lt' : 'bg-red-lt' }}">{{ $tenant->status }}</span></h2>
         <div class="d-flex gap-2">
@@ -57,8 +57,6 @@
         </div>
     </div>
 
-    @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
-    @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
 
     @if(session('provisioned_full_key'))
         <div class="alert alert-warning">

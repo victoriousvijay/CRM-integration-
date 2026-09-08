@@ -1,9 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.platform')
 
 @section('title', 'Edit '.$tenant->name)
 
 @section('content')
-<div class="container-xl" style="max-width: 760px;">
+<div style="max-width: 760px;">
     <div class="d-flex align-items-center justify-content-between mb-3">
         <h2 class="mb-0">Edit Client: {{ $tenant->name }}</h2>
         <a href="{{ route('platform-admin.tenants.show', $tenant) }}" class="btn btn-outline-secondary">Back</a>
