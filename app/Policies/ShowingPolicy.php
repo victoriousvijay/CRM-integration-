@@ -9,7 +9,7 @@ class ShowingPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isAgent() || $user->isListingAgent() || $user->isBuyersAgent();
+        return $user->canManageProperties();
     }
 
     public function view(User $user, Showing $showing): bool

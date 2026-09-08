@@ -40,43 +40,9 @@ class BaseSeeder extends Seeder
             return;
         }
 
-        $rolePermissions = [
-            'admin' => $allPermissions->keys()->all(),
-            'agent' => [
-                'leads.view', 'leads.create', 'leads.edit', 'leads.delete', 'leads.export', 'leads.bulk_actions',
-                'properties.view', 'properties.create', 'properties.edit',
-                'deals.view', 'deals.create', 'deals.edit', 'deals.export',
-                'calendar.view', 'profile.edit',
-            ],
-            'acquisition_agent' => [
-                'leads.view', 'leads.create', 'leads.edit', 'leads.delete', 'leads.export', 'leads.bulk_actions',
-                'properties.view', 'properties.create', 'properties.edit',
-                'deals.view', 'deals.create', 'deals.edit', 'deals.export',
-                'calendar.view', 'profile.edit',
-            ],
-            'disposition_agent' => [
-                'deals.view', 'deals.create', 'deals.edit', 'deals.export',
-                'buyers.view', 'buyers.create', 'buyers.edit', 'buyers.delete', 'buyers.export',
-                'calendar.view', 'profile.edit',
-            ],
-            'field_scout' => [
-                'properties.view', 'properties.create',
-                'profile.edit',
-            ],
-            'listing_agent' => [
-                'leads.view', 'leads.create', 'leads.edit', 'leads.export',
-                'properties.view', 'properties.create', 'properties.edit',
-                'deals.view', 'deals.create', 'deals.edit', 'deals.export',
-                'calendar.view', 'profile.edit',
-            ],
-            'buyers_agent' => [
-                'leads.view', 'leads.create', 'leads.edit', 'leads.export',
-                'deals.view', 'deals.create', 'deals.edit', 'deals.export',
-                'buyers.view', 'buyers.create', 'buyers.edit', 'buyers.export',
-                'properties.view',
-                'calendar.view', 'profile.edit',
-            ],
-        ];
+        // One definition, shared with the runtime fallback in Role.
+        $rolePermissions = ['admin' => $allPermissions->keys()->all()]
+            + Role::SYSTEM_PERMISSIONS;
 
         foreach ($rolePermissions as $roleName => $permissionKeys) {
             $role = Role::where('name', $roleName)->first();

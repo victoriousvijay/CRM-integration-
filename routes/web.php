@@ -221,8 +221,8 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
     Route::post('/onboarding/complete', [OnboardingController::class, 'complete'])->name('onboarding.complete');
     Route::get('/onboarding/skip', [OnboardingController::class, 'skip'])->name('onboarding.skip');
 
-    // ── Calendar (all roles except field scouts) ────────────────────────
-    Route::middleware('role:admin,agent,acquisition_agent,disposition_agent,listing_agent,buyers_agent')->group(function () {
+    // ── Calendar ────────────────────────────────────────────────────
+    Route::middleware('permission:calendar.view')->group(function () {
         Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
         Route::get('/calendar/events', [CalendarController::class, 'events'])->name('calendar.events');
         Route::get('/calendar/sync', [CalendarSyncController::class, 'settings'])->name('calendar.sync');
@@ -231,8 +231,8 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
         Route::delete('/calendar/sync/disconnect', [CalendarSyncController::class, 'disconnect'])->name('calendar.sync.disconnect');
     });
 
-    // ── Activity Inbox (all roles except field scouts) ────────────────────────
-    Route::middleware('role:admin,agent,acquisition_agent,disposition_agent,listing_agent,buyers_agent')->group(function () {
+    // ── Activity Inbox ──────────────────────────────────────────────
+    Route::middleware('permission:leads.view,deals.view')->group(function () {
         Route::get('/activities', [ActivityInboxController::class, 'index'])->name('activities.index');
     });
 
@@ -324,8 +324,10 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
         Route::post('/tags/detach', [TagController::class, 'detach'])->name('tags.detach');
     });
 
-    // ── Leads: admin, agent, acquisition_agent, listing_agent, buyers_agent ──────────
-    Route::middleware('role:admin,agent,acquisition_agent,listing_agent,buyers_agent')->group(function () {
+    // ── Leads ───────────────────────────────────────────────────────
+    // Gated on the permission, not on a list of role names, so a role a
+    // tenant created reaches exactly what its creator switched on.
+    Route::middleware('permission:leads.view')->group(function () {
         Route::get('/leads/export', [LeadController::class, 'export'])->name('leads.export');
         Route::get('/leads/kanban', [LeadKanbanController::class, 'index'])->name('leads.kanban');
         Route::post('/leads/bulk-action', [LeadController::class, 'bulkAction'])->name('leads.bulkAction');
@@ -358,7 +360,7 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
     // PropertyPolicy refuses them there. Letting them through the door only to
     // be turned away by the policy is an Access Denied page on a link they were
     // shown, so the two lists have to match.
-    Route::middleware('role:admin,agent,acquisition_agent,field_scout,listing_agent,buyers_agent')->group(function () {
+    Route::middleware('permission:properties.view')->group(function () {
         Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
         // Declared before the {property} route so "create" isn't swallowed as an id.
         Route::get('/properties/{property}', [PropertyController::class, 'show'])
@@ -367,7 +369,7 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
     });
 
     // ── Properties: adding and editing ──────────────────────────────
-    Route::middleware('role:admin,agent,acquisition_agent,listing_agent,buyers_agent')->group(function () {
+    Route::middleware('permission:properties.create')->group(function () {
         Route::get('/properties/create', [PropertyController::class, 'create'])->name('properties.create');
         Route::post('/properties', [PropertyController::class, 'storeStandalone'])->name('properties.store');
         Route::get('/properties/{property}/edit', [PropertyController::class, 'edit'])->name('properties.edit');
@@ -385,8 +387,8 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
         ->middleware('role:admin,field_scout')
         ->name('properties.field-scout.store');
 
-    // ── Pipeline / Deals: all except field_scout ─────────────────────
-    Route::middleware('role:admin,agent,acquisition_agent,disposition_agent,listing_agent,buyers_agent')->group(function () {
+    // ── Pipeline / Deals ────────────────────────────────────────────
+    Route::middleware('permission:deals.view')->group(function () {
         Route::get('/pipeline/export', [DealController::class, 'export'])->name('deals.export');
         Route::get('/pipeline', [DealController::class, 'pipeline'])->name('pipeline');
         Route::get('/pipeline/{deal}', [DealController::class, 'show'])->name('deals.show');
@@ -428,8 +430,8 @@ Route::middleware(['auth', 'tenant', 'require2fa'])->group(function () {
         Route::get('/pipeline/{deal}/investor-packet', [DocumentGeneratorController::class, 'investorPacket'])->name('documents.investorPacket');
     });
 
-    // ── Buyers: admin, disposition_agent, buyers_agent ────────────────
-    Route::middleware('role:admin,disposition_agent,buyers_agent')->group(function () {
+    // ── Buyers ──────────────────────────────────────────────────────
+    Route::middleware('permission:buyers.view')->group(function () {
         Route::get('/buyers/export', [BuyerController::class, 'export'])->name('buyers.export');
         Route::post('/buyers/import', [BuyerController::class, 'import'])->name('buyers.import');
         Route::post('/buyers/bulk-action', [BuyerController::class, 'bulkAction'])->name('buyers.bulkAction');

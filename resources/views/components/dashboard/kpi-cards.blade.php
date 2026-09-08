@@ -1,6 +1,17 @@
+{{--
+    Every tile links into the module it summarises, so a viewer only gets the
+    tiles they can actually follow. A role without leads.view tapping "Leads
+    This Month" landed on Access Denied — the dashboard handing out a dead end.
+--}}
 @props(['totalLeads', 'leadsThisMonth', 'activeDeals', 'totalPipelineValue', 'closedThisMonth', 'feesThisMonth', 'hotLeads', 'overdueTasks'])
 
+@php
+    $canLeads = auth()->user()->canManageLeads();
+    $canDeals = auth()->user()->canManageDeals();
+@endphp
+
 <div class="row row-deck row-cards mb-4">
+    @if($canLeads)
     <div class="col-sm-6 col-lg-3">
         <a href="{{ route('leads.index') }}" class="card card-sm text-decoration-none" style="color: inherit;">
             <div class="card-body">
@@ -18,6 +29,8 @@
             </div>
         </a>
     </div>
+    @endif
+    @if($canDeals)
     <div class="col-sm-6 col-lg-3">
         <a href="{{ route('pipeline') }}" class="card card-sm text-decoration-none" style="color: inherit;">
             <div class="card-body">
@@ -35,6 +48,8 @@
             </div>
         </a>
     </div>
+    @endif
+    @if($canDeals)
     <div class="col-sm-6 col-lg-3">
         <a href="{{ route('pipeline', ['stage' => 'closing']) }}" class="card card-sm text-decoration-none" style="color: inherit;">
             <div class="card-body">
@@ -52,6 +67,8 @@
             </div>
         </a>
     </div>
+    @endif
+    @if($canLeads)
     <div class="col-sm-6 col-lg-3">
         <a href="{{ route('leads.index', ['temperature' => 'hot']) }}" class="card card-sm text-decoration-none" style="color: inherit;">
             <div class="card-body">
@@ -69,4 +86,5 @@
             </div>
         </a>
     </div>
+    @endif
 </div>

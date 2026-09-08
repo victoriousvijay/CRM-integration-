@@ -148,12 +148,27 @@ class User extends Authenticatable
         return $this->hasRole('buyers_agent');
     }
 
+    /*
+     * What follows asks the permission table, not the role's name.
+     *
+     * These used to be lists of role names — canManageLeads() was "admin or
+     * agent or acquisition_agent or listing_agent". That works for the roles we
+     * ship and fails completely for one a tenant creates: a role called "Agency
+     * Owner" matches no name in any list, so however many permissions its
+     * creator switched on, the navigation hid every module and the routes
+     * refused every page. The Roles & Permissions screen was writing to a table
+     * nothing read.
+     *
+     * The system roles' own permission sets are seeded to match what these
+     * methods used to return, so nothing about them changes.
+     */
+
     /**
      * Check if user can access lead management.
      */
     public function canManageLeads(): bool
     {
-        return $this->isAdmin() || $this->isAgent() || $this->isAcquisitionAgent() || $this->isListingAgent();
+        return $this->hasPermission('leads.view');
     }
 
     /**
@@ -161,6 +176,22 @@ class User extends Authenticatable
      */
     public function canManageBuyers(): bool
     {
-        return $this->isAdmin() || $this->isDispositionAgent() || $this->isBuyersAgent();
+        return $this->hasPermission('buyers.view');
+    }
+
+    /**
+     * Check if user can access the property book.
+     */
+    public function canManageProperties(): bool
+    {
+        return $this->hasPermission('properties.view');
+    }
+
+    /**
+     * Check if user can access the deal pipeline.
+     */
+    public function canManageDeals(): bool
+    {
+        return $this->hasPermission('deals.view');
     }
 }

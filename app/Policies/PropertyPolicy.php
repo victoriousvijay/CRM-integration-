@@ -9,7 +9,7 @@ class PropertyPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isAgent() || $user->isFieldScout();
+        return $user->canManageProperties();
     }
 
     public function view(User $user, Property $property): bool
@@ -27,12 +27,15 @@ class PropertyPolicy
 
     public function create(User $user): bool
     {
-        return $user->isAdmin() || $user->isAgent();
+        return $user->hasPermission('properties.create');
     }
 
     public function createFieldScout(User $user): bool
     {
-        return $user->isAdmin() || $user->isFieldScout();
+        // The field scout's own submission endpoint. Its route already limits
+        // who may post to it; the permission is the same one the CRM's own
+        // add-property form checks.
+        return $user->hasPermission('properties.create');
     }
 
     public function update(User $user, Property $property): bool

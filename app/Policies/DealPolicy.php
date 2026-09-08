@@ -9,7 +9,7 @@ class DealPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin() || $user->isAgent() || $user->isDispositionAgent();
+        return $user->canManageDeals();
     }
 
     public function view(User $user, Deal $deal): bool

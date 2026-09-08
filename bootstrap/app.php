@@ -44,6 +44,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'tenant' => \App\Http\Middleware\TenantMiddleware::class,
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'permission' => \App\Http\Middleware\PermissionMiddleware::class,
             'mode' => \App\Http\Middleware\RequireBusinessMode::class,
             'api.key' => \App\Http\Middleware\ApiKeyMiddleware::class,
             'embed.key' => \App\Http\Middleware\EmbedKeyMiddleware::class,

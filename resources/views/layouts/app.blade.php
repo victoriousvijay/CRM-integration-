@@ -139,6 +139,7 @@
                         @endif
 
                         @if(($businessMode ?? 'wholesale') === 'realestate')
+                        @if(auth()->user()->canManageProperties())
                         <li class="nav-item {{ request()->is('listings*') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('listings.index') }}">
                                 <span class="nav-link-icon">
@@ -148,8 +149,10 @@
                             </a>
                         </li>
                         @endif
+                        @endif
 
                         @unless(auth()->user()->isDispositionAgent())
+                        @if(auth()->user()->canManageProperties())
                         <li class="nav-item {{ request()->is('properties*') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('properties.index') }}">
                                 <span class="nav-link-icon">
@@ -158,9 +161,11 @@
                                 <span class="nav-link-title">{{ __('Properties') }}</span>
                             </a>
                         </li>
+                        @endif
                         @endunless
 
                         @if(($businessMode ?? 'wholesale') === 'realestate')
+                        @if(auth()->user()->canManageProperties())
                         <li class="nav-item {{ request()->is('showings*') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('showings.index') }}">
                                 <span class="nav-link-icon">
@@ -169,6 +174,8 @@
                                 <span class="nav-link-title">{{ __('Showings') }}</span>
                             </a>
                         </li>
+                        @endif
+                        @if(auth()->user()->canManageProperties())
                         <li class="nav-item {{ request()->is('open-houses*') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('open-houses.index') }}">
                                 <span class="nav-link-icon">
@@ -178,8 +185,10 @@
                             </a>
                         </li>
                         @endif
+                        @endif
 
                         @unless(auth()->user()->isFieldScout())
+                        @if(auth()->user()->canManageDeals())
                         <li class="nav-item {{ request()->is('pipeline*') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('pipeline') }}">
                                 <span class="nav-link-icon">
@@ -188,6 +197,7 @@
                                 <span class="nav-link-title">{{ ($businessMode ?? 'wholesale') === 'realestate' ? __('Transactions') : __('Pipeline') }}</span>
                             </a>
                         </li>
+                        @endif
                         @endunless
 
                         @if(auth()->user()->canManageBuyers())
@@ -202,6 +212,7 @@
                         @endif
 
                         @unless(auth()->user()->isFieldScout())
+                        @if(auth()->user()->hasPermission('calendar.view'))
                         <li class="nav-item {{ request()->is('calendar*') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('calendar.index') }}">
                                 <span class="nav-link-icon">
@@ -210,9 +221,11 @@
                                 <span class="nav-link-title">{{ __('Calendar') }}</span>
                             </a>
                         </li>
+                        @endif
                         @endunless
 
                         @unless(auth()->user()->isFieldScout())
+                        @if(auth()->user()->canManageLeads() || auth()->user()->canManageDeals())
                         <li class="nav-item {{ request()->is('activities*') ? 'active' : '' }}">
                             <a class="nav-link" href="{{ route('activities.index') }}">
                                 <span class="nav-link-icon">
@@ -221,6 +234,7 @@
                                 <span class="nav-link-title">{{ __('Activity Feed') }}</span>
                             </a>
                         </li>
+                        @endif
                         @endunless
 
                         @if(auth()->user()->isAdmin())
