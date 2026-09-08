@@ -53,7 +53,7 @@ class AiService
         return match ($provider) {
             'openai' => new OpenAiProvider($apiKey ?? '', $model ?: 'gpt-4o-mini'),
             'anthropic' => new AnthropicProvider($apiKey ?? '', $model ?: 'claude-sonnet-4-6'),
-            'gemini' => new GeminiProvider($apiKey ?? '', $model ?: 'gemini-2.5-flash'),
+            'gemini' => new GeminiProvider($apiKey ?? '', $model ?: GeminiProvider::DEFAULT_MODEL),
             'ollama' => new OllamaProvider($ollamaUrl ?: 'http://localhost:11434', $model ?: 'llama3.1'),
             'custom' => new CustomOpenAiProvider($apiKey ?? '', $model ?: '', $customUrl ?: 'http://localhost:1234'),
             default => throw new \RuntimeException("Unknown AI provider: {$provider}"),

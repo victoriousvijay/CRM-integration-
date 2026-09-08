@@ -102,6 +102,57 @@ class AiModelListingTest extends TestCase
         $models = (new GeminiProvider('bad-key'))->listModels();
 
         $this->assertNotEmpty($models);
-        $this->assertContains('gemini-2.5-flash', array_column($models, 'id'));
+        $this->assertContains(GeminiProvider::DEFAULT_MODEL, array_column($models, 'id'));
+    }
+
+    public function test_the_default_model_is_one_a_new_key_can_actually_use(): void
+    {
+        // Google retires a generation for new keys first: gemini-2.5-flash kept
+        // answering on old projects while every new key got a 404 telling it to
+        // move on. Defaulting to a retired model breaks AI for exactly the
+        // people who just signed up.
+        Http::fake(['generativelanguage.googleapis.com/*' => Http::response([
+            'candidates' => [['content' => ['parts' => [['text' => 'hi']]]]],
+        ])]);
+
+        // Both the provider's own default and the one AiService hands it when a
+        // tenant has picked no model.
+        (new GeminiProvider('test-key'))->chat('system', 'user');
+        \App\Services\AiService::createProvider('gemini', 'test-key', null, null, null)->chat('system', 'user');
+
+        Http::assertSentCount(2);
+        Http::assertSent(fn ($request) => str_contains($request->url(), 'models/'.GeminiProvider::DEFAULT_MODEL.':generateContent'));
+    }
+
+    public function test_a_retired_model_says_what_to_do_instead_of_dumping_json(): void
+    {
+        Http::fake(['generativelanguage.googleapis.com/*' => Http::response([
+            'error' => [
+                'code' => 404,
+                'message' => 'This model models/gemini-2.5-flash is no longer available to new users.',
+                'status' => 'NOT_FOUND',
+            ],
+        ], 404)]);
+
+        try {
+            (new GeminiProvider('test-key', 'gemini-2.5-flash'))->chat('system', 'user');
+            $this->fail('Expected the call to fail.');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('gemini-2.5-flash', $e->getMessage());
+            $this->assertStringContainsString('pick another model', $e->getMessage());
+            // The bare JSON envelope should not be what the user reads.
+            $this->assertStringNotContainsString('"status"', $e->getMessage());
+        }
+    }
+
+    public function test_a_rejected_key_is_named_as_such(): void
+    {
+        Http::fake(['generativelanguage.googleapis.com/*' => Http::response([
+            'error' => ['code' => 403, 'message' => 'API key not valid'],
+        ], 403)]);
+
+        $this->expectExceptionMessageMatches('/rejected this API key/');
+
+        (new GeminiProvider('bad-key'))->chat('system', 'user');
     }
 }

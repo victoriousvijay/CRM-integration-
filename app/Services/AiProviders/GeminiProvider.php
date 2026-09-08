@@ -6,9 +6,20 @@ use Illuminate\Support\Facades\Http;
 
 class GeminiProvider implements AiProviderInterface
 {
+    /**
+     * The model used when a tenant has not picked one.
+     *
+     * Google retires a generation for new keys before it stops answering for
+     * old ones: gemini-2.5-flash kept working on existing projects while any
+     * newly created key got a flat 404 telling it to move to 3.6. Keep this on
+     * the current generation — anyone who wants an older one names it in
+     * settings.
+     */
+    public const DEFAULT_MODEL = 'gemini-3.6-flash';
+
     public function __construct(
         protected string $apiKey,
-        protected string $model = 'gemini-2.5-flash',
+        protected string $model = self::DEFAULT_MODEL,
     ) {}
 
     public function chat(string $systemPrompt, string $userMessage, array $options = []): string
@@ -32,7 +43,7 @@ class GeminiProvider implements AiProviderInterface
         ]);
 
         if ($response->failed()) {
-            throw new \RuntimeException('Gemini API error: ' . $response->body());
+            throw new \RuntimeException($this->readableError($response->status(), $response->json('error.message') ?: $response->body()));
         }
 
         // Gemini 2.5 thinking models return thoughts + response in separate parts.
@@ -46,6 +57,34 @@ class GeminiProvider implements AiProviderInterface
         }
 
         return $text;
+    }
+
+    /**
+     * Turn a Gemini failure into something the person reading it can act on.
+     *
+     * The raw body was being printed straight onto the page — a wall of JSON
+     * whose actual instruction ("use models/gemini-3.6-flash") was buried in
+     * it. The common failures all have one obvious next step, so say it.
+     */
+    protected function readableError(int $status, string $message): string
+    {
+        $where = __('Settings → AI');
+
+        return match (true) {
+            $status === 404 => __(':model is not available for this API key — pick another model under :where. (:message)', [
+                'model' => $this->model,
+                'where' => $where,
+                'message' => $message,
+            ]),
+            in_array($status, [401, 403], true) => __('Google rejected this API key. Check it under :where. (:message)', [
+                'where' => $where,
+                'message' => $message,
+            ]),
+            $status === 429 => __('Gemini rate limit or quota reached. Wait a moment, or check your Google AI Studio plan. (:message)', [
+                'message' => $message,
+            ]),
+            default => __('Gemini API error: :message', ['message' => $message]),
+        };
     }
 
     public function testConnection(): bool
@@ -135,9 +174,9 @@ class GeminiProvider implements AiProviderInterface
     protected function fallbackModels(): array
     {
         return [
-            ['id' => 'gemini-2.5-flash', 'name' => 'Gemini 2.5 Flash'],
-            ['id' => 'gemini-2.5-pro', 'name' => 'Gemini 2.5 Pro'],
-            ['id' => 'gemini-2.0-flash', 'name' => 'Gemini 2.0 Flash'],
+            ['id' => self::DEFAULT_MODEL, 'name' => 'Gemini 3.6 Flash'],
+            ['id' => 'gemini-2.5-flash', 'name' => 'Gemini 2.5 Flash (older keys only)'],
+            ['id' => 'gemini-2.5-pro', 'name' => 'Gemini 2.5 Pro (older keys only)'],
         ];
     }
 }

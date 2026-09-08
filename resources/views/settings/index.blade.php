@@ -947,7 +947,7 @@ Content-Type: application/json</code></pre>
                                         </select>
                                         <input type="text" name="ai_model_manual" class="form-control" id="ai-model-manual" value="{{ $tenant->ai_model }}" placeholder="{{ __('Leave blank for default') }}">
                                         <div class="d-flex justify-content-between align-items-center mt-1">
-                                            <small class="text-secondary" id="ai-model-hint">{{ __('Default: OpenAI = gpt-4o-mini, Anthropic = claude-sonnet-4-6, Gemini = gemini-2.5-flash, Ollama = llama3.1') }}</small>
+                                            <small class="text-secondary" id="ai-model-hint">{{ __('Default: OpenAI = gpt-4o-mini, Anthropic = claude-sonnet-4-6, Gemini = :gemini, Ollama = llama3.1', ['gemini' => \App\Services\AiProviders\GeminiProvider::DEFAULT_MODEL]) }}</small>
                                             <a href="#" class="small" id="ai-model-toggle" style="display: none;">{{ __('Switch to manual input') }}</a>
                                         </div>
                                         <div id="ai-model-loading" class="text-secondary small mt-1" style="display: none;">
