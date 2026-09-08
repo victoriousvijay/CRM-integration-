@@ -99,6 +99,16 @@ class User extends Authenticatable
      */
     public function hasPermission(string $key): bool
     {
+        // What the client's plan includes comes first. A module the platform
+        // owner did not sell them is invisible to everyone there, including
+        // their admin — otherwise "which features does this client get" would
+        // be a suggestion rather than a decision.
+        $module = Tenant::moduleForPermission($key);
+
+        if ($module !== null && ! ($this->tenant?->hasModule($module) ?? true)) {
+            return false;
+        }
+
         // Admin system role always has all permissions
         if ($this->role && $this->role->is_system && $this->role->name === 'admin') {
             return true;

@@ -239,6 +239,7 @@
 
                         @if(auth()->user()->isAdmin())
                         {{-- ── MARKETING ───────────────────────────── --}}
+                        @if(auth()->user()->tenant?->hasModule('marketing') ?? true)
                         @php $marketingActive = request()->is('sequences*') || request()->is('lists*') || request()->is('campaigns*') || request()->is('workflows*') || request()->is('goals*') || request()->is('tags*') || request()->is('document-templates*'); @endphp
                         <li class="nav-item dropdown {{ $marketingActive ? 'active' : '' }}">
                             <a class="nav-link dropdown-toggle" href="#sidebar-marketing" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="{{ $marketingActive ? 'true' : 'false' }}">
@@ -258,8 +259,10 @@
                                 <a class="dropdown-item {{ request()->is('document-templates*') ? 'active' : '' }}" href="{{ route('document-templates.index') }}">{{ __('Documents') }}</a>
                             </div>
                         </li>
+                        @endif
 
                         {{-- ── INSIGHTS ────────────────────────────── --}}
+                        @if(auth()->user()->hasPermission('reports.view'))
                         @php $insightsActive = request()->is('reports*') || request()->is('audit-log*') || request()->is('ai-history*'); @endphp
                         <li class="nav-item dropdown {{ $insightsActive ? 'active' : '' }}">
                             <a class="nav-link dropdown-toggle" href="#sidebar-insights" data-bs-toggle="dropdown" data-bs-auto-close="false" role="button" aria-expanded="{{ $insightsActive ? 'true' : 'false' }}">
@@ -275,6 +278,7 @@
                                 <a class="dropdown-item {{ request()->is('ai-history*') ? 'active' : '' }}" href="{{ route('ai-log.index') }}">{{ __('AI History') }}</a>
                             </div>
                         </li>
+                        @endif
 
                         {{-- ── SYSTEM ──────────────────────────────── --}}
                         @php $systemActive = request()->is('settings*') || request()->is('api-docs*') || request()->is('error-logs*'); @endphp

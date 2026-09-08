@@ -51,9 +51,28 @@
         </div>
 
         <div class="card mb-3">
-            <div class="card-header"><h3 class="card-title">Features</h3></div>
+            <div class="card-header"><h3 class="card-title">Modules in this plan</h3></div>
             <div class="card-body">
-                <p class="text-secondary">What this client's plan includes. Turning one off hides it from every one of their users straight away.</p>
+                <p class="text-secondary">
+                    What this client bought. A module left off is invisible to everyone
+                    there — including their own admin — however they set their roles.
+                    Which of their people may use an included module is their decision,
+                    under Roles &amp; Permissions in their own CRM.
+                </p>
+                @foreach($modules as $key => $module)
+                    <label class="form-check form-switch">
+                        <input type="checkbox" name="modules[]" value="{{ $key }}" class="form-check-input"
+                               @checked(in_array($key, old('modules', $tenant->enabled_modules ?? array_keys($modules)), true))>
+                        <span class="form-check-label">{{ $module['label'] }}</span>
+                    </label>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header"><h3 class="card-title">Portals &amp; integrations</h3></div>
+            <div class="card-body">
+                <p class="text-secondary">The surfaces outside the CRM itself, and the account rules.</p>
                 @foreach($features as $flag => $label)
                     <label class="form-check form-switch">
                         <input type="checkbox" name="{{ $flag }}" value="1" class="form-check-input"

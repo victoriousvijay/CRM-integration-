@@ -40,6 +40,7 @@ class Tenant extends Model
         'ai_enabled',
         'buyer_portal_enabled',
         'broker_portal_enabled',
+        'enabled_modules',
         'max_users',
         'buyer_portal_headline',
         'buyer_portal_description',
@@ -71,6 +72,7 @@ class Tenant extends Model
             'ai_api_key' => 'encrypted',
             'buyer_portal_enabled' => 'boolean',
             'broker_portal_enabled' => 'boolean',
+            'enabled_modules' => 'array',
             'max_users' => 'integer',
             'buyer_portal_config' => 'array',
             'notification_preferences' => 'array',
@@ -100,6 +102,59 @@ class Tenant extends Model
     public function isRealEstate(): bool
     {
         return $this->business_mode === 'realestate';
+    }
+
+    /**
+     * The parts of the product a plan can include or leave out.
+     *
+     * Each module owns the permission groups listed against it: switching a
+     * module off makes every permission in those groups answer no, whatever the
+     * client's own roles say. The groups not listed here — `profile` and
+     * `settings` — are never sold separately; a client admin always needs to
+     * reach their own team and roles.
+     *
+     * @var array<string, array{label: string, groups: list<string>}>
+     */
+    public const MODULES = [
+        'leads' => ['label' => 'Leads', 'groups' => ['leads']],
+        'properties' => ['label' => 'Properties, listings, showings & open houses', 'groups' => ['properties']],
+        'deals' => ['label' => 'Pipeline & transactions', 'groups' => ['deals']],
+        'buyers' => ['label' => 'Clients & buyer database', 'groups' => ['buyers']],
+        'calendar' => ['label' => 'Calendar', 'groups' => ['calendar']],
+        'marketing' => ['label' => 'Marketing — sequences, lists, campaigns, tags', 'groups' => ['sequences', 'lists', 'tags']],
+        'reports' => ['label' => 'Reports & insights', 'groups' => ['reports']],
+    ];
+
+    /**
+     * Does this client's plan include the given module?
+     *
+     * Null means everything, which is what a client created before plans
+     * existed is on — they keep what they had.
+     */
+    public function hasModule(string $module): bool
+    {
+        if ($this->enabled_modules === null) {
+            return true;
+        }
+
+        return in_array($module, $this->enabled_modules, true);
+    }
+
+    /**
+     * The module a permission key belongs to, or null when it belongs to none
+     * and is therefore always available.
+     */
+    public static function moduleForPermission(string $key): ?string
+    {
+        $group = str_contains($key, '.') ? strstr($key, '.', true) : $key;
+
+        foreach (static::MODULES as $module => $definition) {
+            if (in_array($group, $definition['groups'], true)) {
+                return $module;
+            }
+        }
+
+        return null;
     }
 
     /**

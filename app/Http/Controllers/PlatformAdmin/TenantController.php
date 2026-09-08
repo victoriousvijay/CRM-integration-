@@ -92,6 +92,7 @@ class TenantController extends Controller
         return view('platform-admin.tenants.edit', [
             'tenant' => $tenant->load('logo'),
             'features' => self::FEATURES,
+            'modules' => Tenant::MODULES,
         ]);
     }
 
@@ -106,6 +107,8 @@ class TenantController extends Controller
             'business_mode' => 'nullable|in:wholesale,realestate',
             // Blank means no limit, which is what most clients are on.
             'max_users' => 'nullable|integer|min:1|max:10000',
+            'modules' => 'nullable|array',
+            'modules.*' => 'string|in:'.implode(',', array_keys(Tenant::MODULES)),
             'logo' => 'nullable|file|mimes:jpg,jpeg,png,webp,svg|max:'.self::MAX_LOGO_KILOBYTES,
             'remove_logo' => 'nullable|boolean',
         ], [
@@ -117,6 +120,13 @@ class TenantController extends Controller
         foreach (array_keys(self::FEATURES) as $flag) {
             $data[$flag] = $request->boolean($flag);
         }
+
+        // Same reason: the modules that arrive are the whole answer, and one
+        // that arrives for a key we do not know is dropped by the rule above.
+        $data['enabled_modules'] = array_values(array_intersect(
+            array_keys(Tenant::MODULES),
+            $request->input('modules', [])
+        ));
 
         $tenant->update($data);
 
