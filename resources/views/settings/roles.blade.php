@@ -42,7 +42,7 @@
                             @endif
                         </span>
                         <div class="flex-fill">
-                            <div class="fw-bold">{{ __($role->display_name ?? ucwords(str_replace('_', ' ', $role->name))) }}</div>
+                            <div class="fw-bold">{{ $role->label }}</div>
                             <div class="text-secondary small">
                                 @if($role->is_system)
                                     {{ __('System role') }}

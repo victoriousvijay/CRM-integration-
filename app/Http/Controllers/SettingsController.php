@@ -46,13 +46,9 @@ class SettingsController extends Controller
             ->with('role')
             ->get();
 
-        $roles = Role::where(function ($q) use ($tenant) {
-            $q->where('is_system', true)->orWhere('tenant_id', $tenant->id);
-        })->get();
-        $modeRoles = \App\Services\BusinessModeService::isRealEstate($tenant)
-            ? \App\Services\BusinessModeService::REALESTATE_ROLES
-            : \App\Services\BusinessModeService::WHOLESALE_ROLES;
-        $roles = $roles->filter(fn($role) => in_array($role->name, $modeRoles));
+        // The same rule the Roles & Permissions page and inviteAgent use, so a
+        // role you create there is offered here — see Role::scopeAssignableIn.
+        $roles = Role::assignableIn($tenant)->orderBy('is_system', 'desc')->orderBy('name')->get();
         $leadSourceCosts = LeadSourceCost::where('tenant_id', $tenant->id)->pluck('monthly_budget', 'lead_source');
         $webhooks = \App\Models\Webhook::where('tenant_id', $tenant->id)->latest()->get();
         $apiCredentials = \App\Models\ApiCredential::where('tenant_id', $tenant->id)->latest()->get();
@@ -341,12 +337,7 @@ class SettingsController extends Controller
     public function inviteAgent(Request $request)
     {
         $tenant = auth()->user()->tenant;
-        $modeRoleNames = \App\Services\BusinessModeService::getRoles($tenant);
-        $allowedRoleIds = Role::where(function ($q) use ($tenant, $modeRoleNames) {
-            $q->where(function ($q2) use ($modeRoleNames) {
-                $q2->where('is_system', true)->whereIn('name', $modeRoleNames);
-            })->orWhere('tenant_id', $tenant->id);
-        })->pluck('id')->toArray();
+        $allowedRoleIds = Role::assignableIn($tenant)->pluck('id')->toArray();
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -1241,9 +1232,11 @@ class SettingsController extends Controller
     public function roles(Request $request)
     {
         $tenant = auth()->user()->tenant;
-        $roles = Role::where(function ($q) use ($tenant) {
-            $q->where('is_system', true)->orWhere('tenant_id', $tenant->id);
-        })->with('permissions', 'users')->get();
+        $roles = Role::assignableIn($tenant)
+            ->with('permissions', 'users')
+            ->orderBy('is_system', 'desc')
+            ->orderBy('name')
+            ->get();
 
         $permissions = Permission::orderBy('group')->orderBy('display_name')->get();
         $permissionGroups = $permissions->groupBy('group');

@@ -282,7 +282,7 @@
                     <div class="col-md-2">
                         <select name="role_id" class="form-select" required>
                             @foreach($roles as $role)
-                                <option value="{{ $role->id }}">{{ __(ucwords(str_replace('_', ' ', $role->name))) }}</option>
+                                <option value="{{ $role->id }}">{{ $role->label }}@unless($role->is_system) (custom)@endunless</option>
                             @endforeach
                         </select>
                     </div>
@@ -309,7 +309,7 @@
                             <tr>
                                 <td>{{ $agent->name }}</td>
                                 <td>{{ $agent->email }}</td>
-                                <td><span class="badge bg-blue-lt">{{ __(ucwords(str_replace('_', ' ', $agent->role->name ?? '-'))) }}</span></td>
+                                <td><span class="badge bg-blue-lt">{{ $agent->role?->label ?? '-' }}</span></td>
                                 <td>
                                     <span class="badge {{ $agent->is_active ? 'bg-green-lt' : 'bg-red-lt' }}">
                                         {{ $agent->is_active ? __('Active') : __('Inactive') }}
