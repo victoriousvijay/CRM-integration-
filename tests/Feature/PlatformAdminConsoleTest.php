@@ -76,6 +76,72 @@ class PlatformAdminConsoleTest extends TestCase
         ], $overrides);
     }
 
+    public function test_a_new_client_is_set_up_with_the_deployments_own_defaults(): void
+    {
+        // Nobody should have to correct every client from American to Indian by
+        // hand; the deployment says once where it sells — config/platform.php.
+        $this->actingAs($this->platformAdmin)->post(route('platform-admin.tenants.store'), [
+            'company_name' => 'Verma Realty',
+            'admin_name' => 'Verma',
+            'admin_email' => 'admin@verma.test',
+            'admin_password' => 'password123',
+        ])->assertRedirect();
+
+        $created = Tenant::where('slug', 'verma-realty')->firstOrFail();
+
+        $this->assertSame(config('platform.defaults.currency'), $created->currency);
+        $this->assertSame(config('platform.defaults.timezone'), $created->timezone);
+        $this->assertSame(config('platform.defaults.country'), $created->country);
+        $this->assertSame(config('platform.defaults.date_format'), $created->date_format);
+        $this->assertSame(config('platform.defaults.measurement_system'), $created->measurement_system);
+    }
+
+    public function test_the_onboarding_form_arrives_already_filled_in(): void
+    {
+        $html = $this->actingAs($this->platformAdmin)
+            ->get(route('platform-admin.tenants.create'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('value="'.config('platform.defaults.currency').'"', $html);
+        $this->assertStringContainsString('value="'.config('platform.defaults.country').'"', $html);
+        $this->assertStringContainsString(config('platform.defaults.timezone'), $html);
+    }
+
+    public function test_a_country_name_is_refused_rather_than_overflowing_the_column(): void
+    {
+        // tenants.country is varchar(2). "India" got past validation, reached
+        // Postgres and died there — a 500 on save with nothing readable in it.
+        $this->actingAs($this->platformAdmin)
+            ->put(route('platform-admin.tenants.update', $this->client), $this->editPayload(['country' => 'India']))
+            ->assertSessionHasErrors('country');
+
+        $this->actingAs($this->platformAdmin)
+            ->put(route('platform-admin.tenants.update', $this->client), $this->editPayload(['country' => 'IN']))
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('IN', $this->client->fresh()->country);
+    }
+
+    public function test_a_timezone_abbreviation_is_refused_rather_than_quietly_stored(): void
+    {
+        // "IST" is not a timezone PHP accepts. Stored, it gave a tenant whose
+        // dates were wrong with nothing to show for it.
+        $this->actingAs($this->platformAdmin)->post(route('platform-admin.tenants.store'), [
+            'company_name' => 'Bad Timezone',
+            'admin_name' => 'Someone',
+            'admin_email' => 'someone@bad.test',
+            'admin_password' => 'password123',
+            'timezone' => 'IST',
+        ])->assertSessionHasErrors('timezone');
+
+        $this->assertDatabaseMissing('users', ['email' => 'someone@bad.test']);
+
+        $this->actingAs($this->platformAdmin)
+            ->put(route('platform-admin.tenants.update', $this->client), $this->editPayload(['timezone' => 'IST']))
+            ->assertSessionHasErrors('timezone');
+    }
+
     public function test_a_tenant_admin_cannot_reach_the_platform_console_at_all(): void
     {
         $this->actingAs($this->clientAdmin)

@@ -31,22 +31,36 @@
                     <div class="col-md-4">
                         <label class="form-label">Business Mode</label>
                         <select name="business_mode" class="form-select">
-                            <option value="realestate">Real Estate</option>
-                            <option value="wholesale">Wholesale</option>
+                            <option value="realestate" @selected(old('business_mode', $defaults['business_mode']) === 'realestate')>Real Estate</option>
+                            <option value="wholesale" @selected(old('business_mode', $defaults['business_mode']) === 'wholesale')>Wholesale</option>
                         </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Country</label>
-                        <input type="text" name="country" class="form-control" value="{{ old('country') }}" placeholder="India">
+                        {{-- A list, not a box: the column holds a two-letter
+                             code and a typed country name overflowed it. --}}
+                        <select name="country" class="form-select">
+                            @foreach($countries as $code => $name)
+                                <option value="{{ $code }}" @selected(old('country', $defaults['country']) === $code)>{{ $name }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label">Currency</label>
-                        <input type="text" name="currency" class="form-control" value="{{ old('currency', 'USD') }}" placeholder="INR">
+                        <input type="text" name="currency" class="form-control" value="{{ old('currency', $defaults['currency']) }}">
                     </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Timezone</label>
-                    <input type="text" name="timezone" class="form-control" value="{{ old('timezone', 'UTC') }}" placeholder="Asia/Kolkata">
+                    {{-- A list rather than a text box: "IST" is not a timezone
+                         PHP accepts, and the tenant it created had its dates
+                         silently wrong. --}}
+                    <select name="timezone" class="form-select">
+                        @foreach($timezones as $timezone)
+                            <option value="{{ $timezone }}" @selected(old('timezone', $defaults['timezone']) === $timezone)>{{ $timezone }}</option>
+                        @endforeach
+                    </select>
+                    <small class="form-hint">Everything here is a starting point — the client can change it later under their own Settings.</small>
                 </div>
 
                 <hr>

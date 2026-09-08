@@ -46,12 +46,16 @@ class TenantOnboardingService
                 'name' => $payload['company_name'],
                 'slug' => $this->uniqueSlug($slug),
                 'email' => $payload['admin_email'],
-                'business_mode' => $payload['business_mode'] ?? 'realestate',
-                'country' => $payload['country'] ?? null,
-                'currency' => $payload['currency'] ?? 'USD',
-                'timezone' => $payload['timezone'] ?? 'UTC',
-                'date_format' => $payload['date_format'] ?? 'm/d/Y',
-                'locale' => $payload['locale'] ?? 'en',
+                // Defaults come from config so a deployment sets them once for
+                // the market it sells in, rather than every client being set up
+                // as American and corrected by hand — see config/platform.php.
+                'business_mode' => $payload['business_mode'] ?? config('platform.defaults.business_mode'),
+                'country' => $payload['country'] ?? config('platform.defaults.country'),
+                'currency' => $payload['currency'] ?? config('platform.defaults.currency'),
+                'timezone' => $payload['timezone'] ?? config('platform.defaults.timezone'),
+                'date_format' => $payload['date_format'] ?? config('platform.defaults.date_format'),
+                'measurement_system' => $payload['measurement_system'] ?? config('platform.defaults.measurement_system'),
+                'locale' => $payload['locale'] ?? config('platform.defaults.locale'),
                 'logo_path' => $payload['logo_path'] ?? null,
                 'status' => 'active',
                 'api_enabled' => true,

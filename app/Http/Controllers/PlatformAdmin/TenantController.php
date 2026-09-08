@@ -11,6 +11,7 @@ use App\Services\TenantOnboardingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 /**
  * Platform-owner controls for onboarding and operating white-label clients
@@ -21,6 +22,22 @@ class TenantController extends Controller
 {
     /** Largest logo accepted, in kilobytes. */
     public const MAX_LOGO_KILOBYTES = 2048;
+
+    /**
+     * Timezones offered when onboarding, most likely first.
+     *
+     * A free-text box let "IST" through, which PHP does not accept as a
+     * timezone; the tenant it created had its dates silently wrong. A list the
+     * owner picks from cannot produce that, and the field still validates
+     * server-side for anything posted directly.
+     *
+     * @var list<string>
+     */
+    public const TIMEZONES = [
+        'Asia/Kolkata', 'Asia/Dubai', 'Asia/Karachi', 'Asia/Colombo', 'Asia/Kathmandu',
+        'Asia/Dhaka', 'Asia/Singapore', 'Europe/London', 'America/New_York',
+        'America/Chicago', 'America/Los_Angeles', 'Australia/Sydney', 'UTC',
+    ];
 
     /**
      * The per-client switches the platform owner controls.
@@ -51,7 +68,11 @@ class TenantController extends Controller
 
     public function create()
     {
-        return view('platform-admin.tenants.create');
+        return view('platform-admin.tenants.create', [
+            'defaults' => config('platform.defaults'),
+            'timezones' => self::TIMEZONES,
+            'countries' => \Fmt::countries(),
+        ]);
     }
 
     public function store(Request $request, TenantOnboardingService $onboarding)
@@ -63,9 +84,13 @@ class TenantController extends Controller
             'admin_email' => 'required|email|max:255|unique:users,email',
             'admin_password' => 'required|string|min:8',
             'business_mode' => 'nullable|in:wholesale,realestate',
-            'country' => 'nullable|string|max:100',
+            // The column is varchar(2): a country name overflows it and the
+            // insert dies at the database rather than in validation.
+            'country' => ['nullable', 'string', 'size:2', Rule::in(array_keys(\Fmt::countries()))],
             'currency' => 'nullable|string|max:10',
-            'timezone' => 'nullable|string|max:100',
+            'timezone' => ['nullable', 'string', 'max:100', 'timezone'],
+        ], [
+            'timezone.timezone' => 'Use a full timezone name such as Asia/Kolkata — an abbreviation like IST is not one, and dates would come out wrong.',
         ]);
 
         $result = $onboarding->onboard($data);
@@ -93,6 +118,8 @@ class TenantController extends Controller
             'tenant' => $tenant->load('logo'),
             'features' => self::FEATURES,
             'modules' => Tenant::MODULES,
+            'timezones' => self::TIMEZONES,
+            'countries' => \Fmt::countries(),
         ]);
     }
 
@@ -101,9 +128,9 @@ class TenantController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
-            'country' => 'nullable|string|max:100',
+            'country' => ['nullable', 'string', 'size:2', Rule::in(array_keys(\Fmt::countries()))],
             'currency' => 'nullable|string|max:10',
-            'timezone' => 'nullable|string|max:100',
+            'timezone' => ['nullable', 'string', 'max:100', 'timezone'],
             'business_mode' => 'nullable|in:wholesale,realestate',
             // Blank means no limit, which is what most clients are on.
             'max_users' => 'nullable|integer|min:1|max:10000',
@@ -113,6 +140,7 @@ class TenantController extends Controller
             'remove_logo' => 'nullable|boolean',
         ], [
             'logo.max' => 'The logo must be '.round(self::MAX_LOGO_KILOBYTES / 1024).' MB or smaller.',
+            'timezone.timezone' => 'Use a full timezone name such as Asia/Kolkata — an abbreviation like IST is not one, and dates would come out wrong.',
         ]);
 
         // Checkboxes: an unticked box sends nothing, so read every flag from the

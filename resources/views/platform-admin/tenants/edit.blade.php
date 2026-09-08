@@ -119,15 +119,32 @@
                 <div class="row">
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Country</label>
-                        <input type="text" name="country" class="form-control" value="{{ old('country', $tenant->country) }}">
+                        <select name="country" class="form-select @error('country') is-invalid @enderror">
+                            @foreach($countries as $code => $name)
+                                <option value="{{ $code }}" @selected(old('country', $tenant->country) === $code)>{{ $name }}</option>
+                            @endforeach
+                        </select>
+                        @error('country')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Currency</label>
-                        <input type="text" name="currency" class="form-control" value="{{ old('currency', $tenant->currency) }}" placeholder="INR">
+                        <input type="text" name="currency" class="form-control" value="{{ old('currency', $tenant->currency) }}">
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Timezone</label>
-                        <input type="text" name="timezone" class="form-control" value="{{ old('timezone', $tenant->timezone) }}" placeholder="Asia/Kolkata">
+                        <select name="timezone" class="form-select @error('timezone') is-invalid @enderror">
+                            @php $current = old('timezone', $tenant->timezone); @endphp
+                            {{-- A client set up before this was a list may carry
+                                 something not in it; keep their value rather
+                                 than silently reassigning their timezone. --}}
+                            @unless(in_array($current, $timezones, true))
+                                <option value="{{ $current }}" selected>{{ $current }}</option>
+                            @endunless
+                            @foreach($timezones as $timezone)
+                                <option value="{{ $timezone }}" @selected($current === $timezone)>{{ $timezone }}</option>
+                            @endforeach
+                        </select>
+                        @error('timezone')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                 </div>
             </div>
